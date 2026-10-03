@@ -1,0 +1,29 @@
+services:
+
+  finanzas-manager:
+    build: .
+    container_name: finanzas-manager
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      DATABASE_FINANZAS_MANAGER: r2dbc:postgresql://postgres:5432/finanzas
+      DBUSER: postgres
+      DBPASSWORD: postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+    container_name: finanzas-postgres
+    environment:
+      POSTGRES_DB: finanzas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
