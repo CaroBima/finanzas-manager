@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>org.personalproject</groupId>
+    <groupId>org.cbpersonalproject</groupId>
     <artifactId>finanzas-manager</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
