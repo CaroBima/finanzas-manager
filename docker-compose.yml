@@ -1,7 +1,7 @@
 services:
 
   finanzas-manager:
-    build: .
+    build: ./finanzas-manager-back
     container_name: finanzas-manager
     ports:
       - "8081:8081"

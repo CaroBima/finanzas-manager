@@ -39,7 +39,9 @@ function FilaTotales({
   mostrarEscenario: boolean
   bold?: boolean
 }) {
-  const sx = bold ? { fontWeight: 700, bgcolor: 'action.hover' } : { fontWeight: 600, bgcolor: 'grey.100' }
+  const sx = bold
+    ? { fontWeight: 700, bgcolor: 'action.hover' }
+    : { fontWeight: 600, bgcolor: 'grey.100' }
   return (
     <TableRow>
       <TableCell sx={sx}>{label}</TableCell>
@@ -85,7 +87,10 @@ function SeccionMovimientos({
   return (
     <>
       <TableRow>
-        <TableCell colSpan={colSpan} sx={{ bgcolor: 'primary.light', color: 'primary.contrastText', fontWeight: 700 }}>
+        <TableCell
+          colSpan={colSpan}
+          sx={{ bgcolor: 'primary.light', color: 'primary.contrastText', fontWeight: 700 }}
+        >
           {titulo}
         </TableCell>
       </TableRow>
@@ -119,8 +124,10 @@ function SeccionMovimientos({
 export function TablaMensual({ movimientos, escenarioDetalle }: TablaMensualProps) {
   if (movimientos.length === 0) {
     return (
-      <Box p={6} textAlign="center">
-        <Typography color="text.secondary">No hay movimientos para este período.</Typography>
+      <Box sx={{ p: 6, textAlign: 'center' }}>
+        <Typography sx={{ color: 'text.secondary' }}>
+          No hay movimientos para este período.
+        </Typography>
       </Box>
     )
   }

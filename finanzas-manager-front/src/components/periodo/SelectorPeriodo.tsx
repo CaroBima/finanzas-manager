@@ -15,7 +15,7 @@ export function SelectorPeriodo() {
   const { mes, anio, setPeriodo, anterior, siguiente } = usePeriodo()
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
       <IconButton size="small" onClick={() => setPeriodo(anterior.mes, anterior.anio)}>
         <ChevronLeftIcon />
       </IconButton>

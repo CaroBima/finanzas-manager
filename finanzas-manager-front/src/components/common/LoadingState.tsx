@@ -2,7 +2,7 @@ import { Box, CircularProgress } from '@mui/material'
 
 export function LoadingState() {
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" p={6}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 6 }}>
       <CircularProgress />
     </Box>
   )

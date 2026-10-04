@@ -36,7 +36,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   return (
     <Box sx={{ width: DRAWER_WIDTH }}>
       <Toolbar>
-        <Typography variant="subtitle1" fontWeight={700}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
           Finanzas Manager
         </Typography>
       </Toolbar>

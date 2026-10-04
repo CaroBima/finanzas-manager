@@ -12,8 +12,12 @@ export function PeriodoPage() {
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
-        <Typography variant="h5" fontWeight={700}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}
+      >
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Registro mensual
         </Typography>
         <SelectorPeriodo />

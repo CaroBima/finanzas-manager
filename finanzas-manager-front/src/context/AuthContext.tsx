@@ -10,8 +10,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 const TOKEN_KEY = 'fm_token'
+const MOCK_AUTH = true
+const MOCK_TOKEN = 'mock-token'
 
 function readToken(): string | null {
+  if (MOCK_AUTH) return MOCK_TOKEN
   try {
     return localStorage.getItem(TOKEN_KEY)
   } catch {
