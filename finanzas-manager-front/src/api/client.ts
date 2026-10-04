@@ -3,7 +3,7 @@ import axios from 'axios'
 const TOKEN_KEY = 'fm_token'
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
 })
 
 client.interceptors.request.use((config) => {
