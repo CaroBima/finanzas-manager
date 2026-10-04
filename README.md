@@ -29,15 +29,56 @@ API REST reactiva para gestionar ingresos y egresos mensuales. Permite registrar
 | HU-07 | Endpoint DELETE — Eliminar gasto mensual | Pendiente |
 | HU-08 | Endpoint GET — Resumen/dashboard de gastos por categoría | Pendiente |
 
-## Modelo de datos (resumen)
+## Modelo de datos
 
-```
-tipo_movimiento   → naturaleza: I (ingreso) / E (egreso)
-movimiento        → concepto (expensas, luz, sueldo…)
-periodo           → año + mes
-movimiento_mensual→ monto previsto y real por periodo
-escenario         → simulación de un mes con montos alternativos
-escenario_detalle → movimientos que entran en cada simulación
+```mermaid
+erDiagram
+    tipo_movimiento {
+        int id_tipo_movimiento PK
+        varchar nombre
+        char naturaleza "I=ingreso / E=egreso"
+    }
+    movimiento {
+        int id_movimiento PK
+        int id_tipo_movimiento FK
+        varchar nombre
+        varchar descripcion
+        boolean activo
+    }
+    periodo {
+        int id_periodo PK
+        smallint anio
+        smallint mes
+    }
+    movimiento_mensual {
+        int id_movimiento_mensual PK
+        int id_periodo FK
+        int id_movimiento FK
+        numeric monto_previsto
+        numeric monto_real
+        smallint nro_cuota
+        smallint total_cuotas
+        varchar notas
+    }
+    escenario {
+        int id_escenario PK
+        int id_periodo FK
+        varchar nombre
+        varchar descripcion
+    }
+    escenario_detalle {
+        int id_escenario_detalle PK
+        int id_escenario FK
+        int id_movimiento FK
+        numeric monto
+    }
+
+    tipo_movimiento ||--o{ movimiento : "clasifica"
+    movimiento ||--o{ movimiento_mensual : "registra"
+    periodo ||--o{ movimiento_mensual : "agrupa"
+    periodo ||--o{ escenario : "tiene"
+    escenario ||--o{ escenario_detalle : "contiene"
+    movimiento ||--o{ escenario_detalle : "participa en"
 ```
 
 Las vistas `v_resumen_mensual` y `v_resumen_escenario` calculan totales y saldo sin almacenarlos.
@@ -125,8 +166,13 @@ finanzas-manager/
 │       │   └── model/
 │       └── resources/
 │           ├── application.properties
-│           └── db/migration/          ← migraciones Flyway
-│               └── v1__crear_tablas_movimientos.sql
+│           ├── application-dev.properties
+│           └── db/
+│               ├── migration/         ← migraciones Flyway (todos los entornos)
+│               │   ├── V1__create_schema.sql
+│               │   └── V2__create_views.sql
+│               └── dev/               ← solo perfil dev
+│                   └── V3__seed_data.sql
 ├── Docs/                              ← diagramas y documentación
 ├── Dockerfile
 ├── docker-compose.yml

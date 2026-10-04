@@ -8,6 +8,7 @@ services:
     environment:
       SERVER_PORT: 8081
       DATABASE_FINANZAS_MANAGER: r2dbc:postgresql://postgres:5432/finanzas
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/finanzas
       DBUSER: postgres
       DBPASSWORD: postgres
       REDIS_HOST: redis
