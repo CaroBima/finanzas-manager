@@ -1,5 +1,4 @@
 target
-.mvn
-src
-Dockerfile
-.dockerignore
+.git
+.idea
+*.md
