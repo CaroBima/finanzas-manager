@@ -1,44 +1,47 @@
 package org.cbpersonalproject.controller;
 
-import java.util.List;
-
 import org.cbpersonalproject.dto.MovimientoMensualResponse;
+import org.cbpersonalproject.dto.MovimientoRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 @RestController
-@RequestMapping("/v1/gastosmensuales")
+@RequestMapping("/v1/controlmensual")
 public class MovimientosMensualesController {
 
     @GetMapping("/movimientos")
-    public List<MovimientoMensualResponse> getMovimientos() {
+    public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientos() {
+        return null ; //movimientosMensuales.getMovimientosMensuales();
+    }
+
+    @GetMapping("/tiposmovimiento")
+    public Flux<ResponseEntity<MovimientoMensualResponse>> getTiposMovimiento() {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
     @GetMapping("/movimientos/{id}")
-    public List<MovimientoMensualResponse> getMovimientosPorId(@RequestParam int id) {
+    public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorId(@RequestParam int id) {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
     @GetMapping("/movimientospormes")
-    public List<MovimientoMensualResponse> getMovimientosMensuales() {
+    public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorMes(@RequestParam int mes, 
+                                                                @RequestParam int anio) {
         return null ; //movimientosMensuales.getMovimientosMensuales();
+    }
+
+    @PostMapping
+    public Mono<ResponseEntity<MovimientoMensualResponse>> crearMovimiento(@Valid @RequestBody MovimientoRequest request){
+        return null;
     }
 }
 
-/*
-Endpoints:
-
-GET    /api/expenses
-GET    /api/expenses/{id}
-POST   /api/expenses
-PUT    /api/expenses/{id}
-DELETE /api/expenses/{id}
-
-Y agregaría algunos específicos:
-
-GET /api/expenses?month=2026-10
-GET /api/expenses/summary?month=2026-10
- */
