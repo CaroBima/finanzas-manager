@@ -37,3 +37,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Frontend ###
+finazas-manager-front/node_modules/
+finazas-manager-front/dist/
+finazas-manager-front/.env
+finazas-manager-front/.env.local
+finazas-manager-front/.env.*.local
+
+### Claude Code ###
+.claude/
+CLAUDE.md
