@@ -1,7 +1,7 @@
 services:
 
   finanzas-manager:
-    build: .
+    build: ./finanzas-manager-back
     container_name: finanzas-manager
     ports:
       - "8081:8081"
@@ -28,6 +28,14 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
+
+  finanzas-manager-front:
+    build: ./finanzas-manager-front
+    container_name: finanzas-manager-front
+    ports:
+      - "3000:80"
+    depends_on:
+      - finanzas-manager
 
   postgres:
     image: postgres:17-alpine
