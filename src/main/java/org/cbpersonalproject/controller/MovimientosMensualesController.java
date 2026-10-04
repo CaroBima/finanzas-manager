@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/gastosmensuales")
-public class GastosMensualesController {
+public class MovimientosMensualesController {
 
     @GetMapping("/consultarmovimientos")
     public List<MovimientoMensualDto> getMovimientosMensuales() {
