@@ -1,7 +1,6 @@
 import { Box, Button, Card, CardContent, Stack, Typography } from '@mui/material'
-import GoogleIcon from '@mui/icons-material/Google'
 
-const GOOGLE_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL ?? ''}/oauth2/authorization/google`
+const AUTH_URL = `${import.meta.env.VITE_API_BASE_URL ?? ''}/oauth2/authorization/keycloak`
 
 export function LoginPage() {
   return (
@@ -26,11 +25,10 @@ export function LoginPage() {
             <Button
               variant="contained"
               size="large"
-              startIcon={<GoogleIcon />}
-              href={GOOGLE_AUTH_URL}
+              href={AUTH_URL}
               fullWidth
             >
-              Continuar con Google
+              Iniciar sesión
             </Button>
           </Stack>
         </CardContent>

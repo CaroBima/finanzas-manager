@@ -1,6 +1,7 @@
 {
   "realm": "finanzas",
   "enabled": true,
+  "registrationAllowed": true,
   "accessTokenLifespan": 3600,
   "clients": [
     {

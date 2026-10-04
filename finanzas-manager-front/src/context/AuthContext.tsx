@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import client from '../api/client'
 
 interface AuthContextValue {
   token: string | null
@@ -10,11 +11,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 const TOKEN_KEY = 'fm_token'
-const MOCK_AUTH = true
-const MOCK_TOKEN = 'mock-token'
 
 function readToken(): string | null {
-  if (MOCK_AUTH) return MOCK_TOKEN
   try {
     return localStorage.getItem(TOKEN_KEY)
   } catch {
@@ -35,12 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
-    try {
-      localStorage.removeItem(TOKEN_KEY)
-    } catch {
-      /* no-op */
-    }
-    setToken(null)
+    client.post('/auth/logout').catch(() => {}).finally(() => {
+      try {
+        localStorage.removeItem(TOKEN_KEY)
+      } catch {
+        /* no-op */
+      }
+      setToken(null)
+    })
   }, [])
 
   return (
