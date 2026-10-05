@@ -9,7 +9,7 @@
       "enabled": true,
       "protocol": "openid-connect",
       "clientAuthenticatorType": "client-secret",
-      "secret": "dev-finanzas-secret-2024",
+      "secret": "KEYCLOAK_CLIENT_SECRET_PLACEHOLDER",
       "publicClient": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,

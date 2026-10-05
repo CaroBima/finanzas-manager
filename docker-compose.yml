@@ -105,6 +105,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     container_name: finanzas-keycloak
+    entrypoint: ["/bin/bash", "/tmp/entrypoint.sh"]
     command: start-dev --import-realm
     environment:
       KC_DB: postgres
@@ -114,8 +115,10 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
     volumes:
-      - ./docker/keycloak/realm-finanzas.json:/opt/keycloak/data/import/realm-finanzas.json
+      - ./docker/keycloak/realm-finanzas.json:/tmp/realm-template/realm-finanzas.json
+      - ./docker/keycloak/docker-entrypoint.sh:/tmp/entrypoint.sh
     ports:
       - "8080:8080"
       - "9000:9000"
