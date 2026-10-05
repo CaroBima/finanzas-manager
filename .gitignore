@@ -49,6 +49,9 @@ finazas-manager-front/.env.*.local
 .env
 .env.local
 
+### Local ###
+analisis/
+
 ### Claude Code ###
 .claude/
 CLAUDE.md
