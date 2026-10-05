@@ -22,7 +22,7 @@ services:
       KEYCLOAK_CLIENT_ID: finanzas-manager-back
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/finanzas
-      FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: http://localhost:3000
     depends_on:
       postgres:
         condition: service_healthy
