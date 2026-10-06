@@ -24,7 +24,7 @@ services:
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/finanzas
       KEYCLOAK_EXTERNAL_AUTH_URI: http://localhost:8080/realms/finanzas/protocol/openid-connect/auth
       KEYCLOAK_REDIRECT_BASE_URL: http://localhost:8081
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:3006
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,7 +41,7 @@ services:
     build: ./finanzas-manager-front
     container_name: finanzas-manager-front
     ports:
-      - "3000:80"
+      - "3006:80"
     depends_on:
       - finanzas-manager
 
