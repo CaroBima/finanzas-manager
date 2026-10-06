@@ -32,6 +32,8 @@ public class AuthService {
                     nuevo.setEmail(email);
                     nuevo.setNombre(nombre);
                     nuevo.setApellido(apellido);
+                    nuevo.setFechaRegistro(OffsetDateTime.now());
+                    nuevo.setFechaUltimoLogin(OffsetDateTime.now());
                     nuevo.setActivo(true);
                     return usuarioRepository.save(nuevo);
                 }))
