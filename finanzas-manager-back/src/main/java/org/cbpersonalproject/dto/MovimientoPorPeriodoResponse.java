@@ -4,11 +4,11 @@ public record MovimientoPorPeriodoResponse(String nombreMovimiento,
                                            String descripcion,
                                            Double montoPrevisto,
                                            Double montoReal,
-                                           int nroCuota,
-                                           int totalCuotas,
+                                           Integer nroCuota,
+                                           Integer totalCuotas,
                                            String notas,
                                            String nombreTipoMovimiento,
                                            String naturalezaTipoMov,
-                                           int anio,
-                                           int mes) {
+                                           Integer anio,
+                                           Integer mes) {
 }

@@ -5,11 +5,10 @@ import { usePeriodo } from '../../hooks/usePeriodo'
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre',
 ]
 
-const ANIO_ACTUAL = new Date().getFullYear()
-const ANIOS = Array.from({ length: 10 }, (_, i) => ANIO_ACTUAL - 4 + i)
+const ANIOS = [2024, 2025, 2026, 2027]
 
 export function SelectorPeriodo() {
   const { mes, anio, setPeriodo, anterior, siguiente } = usePeriodo()

@@ -18,8 +18,8 @@ public interface MovimientoMensualRepository extends ReactiveCrudRepository<Movi
             mm.total_cuotas as totalCuotas, 
             mm.notas as notas, 
             tm.nombre as nombreTipoMovimiento, 
-            tm.naturaleza as naturalezaTipoMov
-            p.anio as anio
+            tm.naturaleza as naturalezaTipoMov,
+            p.anio as anio,
             p.mes as mes 
             from movimiento_mensual mm
             join movimiento m on m.id_movimiento = mm.id_movimiento

@@ -61,3 +61,17 @@ export interface EscenarioDetalle {
   movimiento: Movimiento
   monto: number
 }
+
+export interface MovimientoPorPeriodoResponse {
+  nombreMovimiento: string
+  descripcion?: string
+  montoPrevisto: number | null
+  montoReal: number | null
+  nroCuota: number | null
+  totalCuotas: number | null
+  notas?: string
+  nombreTipoMovimiento: string
+  naturalezaTipoMov: Naturaleza
+  anio: number | null
+  mes: number | null
+}
