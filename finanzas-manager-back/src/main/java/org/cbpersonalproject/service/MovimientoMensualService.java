@@ -1,9 +1,6 @@
 package org.cbpersonalproject.service;
 
-import org.cbpersonalproject.dto.MovimientoMensualResponse;
-import org.cbpersonalproject.dto.MovimientoResponse;
-import org.cbpersonalproject.dto.PeriodoResponse;
-import org.cbpersonalproject.dto.TipoMovimientoResponse;
+import org.cbpersonalproject.dto.*;
 import org.cbpersonalproject.model.Movimiento;
 import org.cbpersonalproject.model.MovimientoMensual;
 import org.cbpersonalproject.model.Periodo;
@@ -44,7 +41,7 @@ public class MovimientoMensualService {
 
             return tipoMovimientoRepo
                     .findById(movimiento.getIdTipoMovimiento())
-                    .switchIfEmpty(Mono.error(new RuntimeException("Tipo de Movimiento no encontrado: " + mov.getIdMovimientoMensual())))
+                    .switchIfEmpty(Mono.error(new RuntimeException("Tipo de Movimiento no encontrado: " + movimiento.getIdTipoMovimiento())))
                     .map(tipo -> new MovimientoMensualResponse(
                             mov.getMontoPrevisto(),
                             mov.getMontoReal(),
@@ -69,18 +66,8 @@ public class MovimientoMensualService {
         });
     }
 
-    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo( int mes, int anio){
-       /* Flux<MovimientoMensualResponse> movMensualPorIdResp = movMensRepo.findByIdPeriodo(mes, anio)
-                .map(mov -> new MovimientoMensualResponse(
-                        mov.getIdPeriodo(),
-                        mov.getIdMovimiento(),
-                        mov.getMontoPrevisto(),
-                        mov.getMontoReal(),
-                        mov.getNroCuota(),
-                        mov.getTotalCuotas(),
-                        mov.getNotas()
-                ));*/
-        return null; //movMensualPorIdResp;
+    public Flux<MovimientoPorPeriodoResponse> getMovimientoMensualPorPeriodo(int mes, int anio){
+         return movMensRepo.findByPeriodo(mes, anio);
     }
 
 }

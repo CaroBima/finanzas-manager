@@ -2,6 +2,7 @@ package org.cbpersonalproject.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.cbpersonalproject.dto.MovimientoMensualResponse;
+import org.cbpersonalproject.dto.MovimientoPorPeriodoResponse;
 import org.cbpersonalproject.dto.MovimientoRequest;
 import org.cbpersonalproject.service.MovimientoMensualService;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,8 @@ public class MovimientosMensualesController {
     }
 
     @GetMapping("/movimientosporperiodo")
-    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo(@RequestParam int mes,
-                                                                          @RequestParam int anio) {
+    public Flux<MovimientoPorPeriodoResponse> getMovimientoMensualPorPeriodo(@RequestParam int mes,
+                                                                             @RequestParam int anio) {
         return movimientosMensuales.getMovimientoMensualPorPeriodo(mes, anio);
     }
 
