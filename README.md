@@ -20,7 +20,7 @@ API REST reactiva para gestionar ingresos y egresos mensuales. Permite registrar
 
 | HU | Descripción | Estado |
 |---|---|---|
-| HU-01 | Autenticación con Google OAuth2 | Pendiente |
+| HU-01 | Autenticación con Keycloak | Completada |
 | HU-02 | Diseño e inicialización del esquema de base de datos PostgreSQL | Completada |
 | HU-03 | Endpoint GET — Consulta de gastos mensuales | En curso |
 | HU-04 | Endpoint POST — Guardar nuevo gasto mensual | Pendiente |
