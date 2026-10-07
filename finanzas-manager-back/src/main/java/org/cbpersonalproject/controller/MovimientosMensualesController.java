@@ -38,10 +38,10 @@ public class MovimientosMensualesController {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
-    @GetMapping("/movimientospormes")
-    public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorMes(@RequestParam int mes, 
+    @GetMapping("/movimientosporperiodo")
+    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo(@RequestParam int mes,
                                                                 @RequestParam int anio) {
-        return null ; //movimientosMensuales.getMovimientosMensuales();
+        return movimientosMensuales.getMovimientoMensualPorPeriodo(mes, anio);
     }
 
     @PostMapping
