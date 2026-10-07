@@ -128,6 +128,9 @@ docker compose down
 
 # Detener y borrar volúmenes (base de datos incluida)
 docker compose down -v
+
+# Seedear los datos en la bd
+Get-Content finanzas-manager-back\src\main\resources\db\dev\V3__seed_data.sql | docker exec -i finanzas-postgres psql -U postgres -d finanzas
 ```
 
 ### Variables de entorno
