@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/controlmensual")
 public class MovimientosMensualesController {
 
-    private static MovimientosMensualesService movimientosMensuales;
+    private final MovimientosMensualesService movimientosMensuales;
 
     @GetMapping("/movimientos")
     public Flux<MovimientoMensualResponse> getMovimientos() {
