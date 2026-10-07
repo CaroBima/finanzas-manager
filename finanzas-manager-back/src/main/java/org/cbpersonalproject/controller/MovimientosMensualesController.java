@@ -3,7 +3,7 @@ package org.cbpersonalproject.controller;
 import lombok.RequiredArgsConstructor;
 import org.cbpersonalproject.dto.MovimientoMensualResponse;
 import org.cbpersonalproject.dto.MovimientoRequest;
-import org.cbpersonalproject.service.MovimientosMensualesService;
+import org.cbpersonalproject.service.MovimientoMensualService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,27 +21,28 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/controlmensual")
 public class MovimientosMensualesController {
 
-    private final MovimientosMensualesService movimientosMensuales;
+    private final MovimientoMensualService movimientosMensuales;
 
     @GetMapping("/movimientos")
     public Flux<MovimientoMensualResponse> getMovimientos() {
         return movimientosMensuales.getMovimientosMensuales();
     }
 
+    @GetMapping("/movimientosporperiodo")
+    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo(@RequestParam int mes,
+                                                                          @RequestParam int anio) {
+        return movimientosMensuales.getMovimientoMensualPorPeriodo(mes, anio);
+    }
+
+
     @GetMapping("/tiposmovimiento")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getTiposMovimiento() {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
-    @GetMapping("/movimientos/{id}")
+    @GetMapping("/movimientos/{id")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorId(@RequestParam int id) {
         return null ; //movimientosMensuales.getMovimientosMensuales();
-    }
-
-    @GetMapping("/movimientosporperiodo")
-    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo(@RequestParam int mes,
-                                                                @RequestParam int anio) {
-        return movimientosMensuales.getMovimientoMensualPorPeriodo(mes, anio);
     }
 
     @PostMapping

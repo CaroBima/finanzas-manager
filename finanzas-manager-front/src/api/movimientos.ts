@@ -4,7 +4,7 @@ import type { MovimientoMensualResponse, Movimiento, TipoMovimiento } from '../t
 const URL_CONTROL_MENSUAL = '/v1/controlmensual';
 
 export async function fetchMovimientosMensuales(mes: number, anio: number): Promise<MovimientoMensualResponse[]> {
-  const { data } = await client.get(URL_CONTROL_MENSUAL + '/movimientospormes', { params: { mes, anio } })
+  const { data } = await client.get(URL_CONTROL_MENSUAL + '/movimientosporperiodo', { params: { mes, anio } })
   return data
 }
 

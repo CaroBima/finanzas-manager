@@ -22,9 +22,10 @@ export interface Periodo {
 }
 
 export interface MovimientoMensualResponse {
-  idMovimientoMensual: number
-  periodo: Periodo
-  movimiento: Movimiento
+  idPeriodo: number
+  idMovimiento: number
+  nombre: string
+  naturaleza: Naturaleza
   montoPrevisto: number
   montoReal: number
   nroCuota?: number
