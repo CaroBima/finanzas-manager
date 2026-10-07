@@ -40,7 +40,7 @@ public class MovimientosMensualesController {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
-    @GetMapping("/movimientos/{id")
+    @GetMapping("/movimientos/{id}")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorId(@RequestParam int id) {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
