@@ -70,7 +70,7 @@ function SeccionMovimientos({
 }: {
   titulo: string
   filas: MovimientoMensualResponse[]
-  escenarioMap: Map<number, number>
+  escenarioMap: Map<string, number>
   mostrarEscenario: boolean
   naturaleza: Naturaleza
   labelTotal: string
