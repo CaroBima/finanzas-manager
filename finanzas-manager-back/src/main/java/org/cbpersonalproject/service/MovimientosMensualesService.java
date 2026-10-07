@@ -8,6 +8,7 @@ import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service 
 @RequiredArgsConstructor
@@ -28,4 +29,19 @@ public class MovimientosMensualesService {
                 ));
         return movMensualResp;
     }
+
+    public Flux<MovimientoMensualResponse> getMovimientoMensualPorPeriodo( int mes, int anio){
+        Flux<MovimientoMensualResponse> movMensualPorIdResp = movMensRepo.findByIdPeriodo(mes, anio)
+                .map(mov -> new MovimientoMensualResponse(
+                        mov.getIdPeriodo(),
+                        mov.getIdMovimiento(),
+                        mov.getMontoPrevisto(),
+                        mov.getMontoReal(),
+                        mov.getNroCuota(),
+                        mov.getTotalCuotas(),
+                        mov.getNotas()
+                ));
+        return movMensualPorIdResp;
+    }
+
 }
