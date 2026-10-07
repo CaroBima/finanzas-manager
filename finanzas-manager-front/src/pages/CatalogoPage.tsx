@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Box,
+  Chip,
   CircularProgress,
   Paper,
   Stack,
@@ -13,15 +14,16 @@ import {
   Typography,
 } from '@mui/material'
 import { fetchCatalogoMovimientos } from '../api/movimientos'
+import type { MovimientoMensualResponse } from '../types'
 
 export function CatalogoPage() {
-  const [rows, setRows] = useState<Record<string, unknown>[]>([])
+  const [rows, setRows] = useState<MovimientoMensualResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCatalogoMovimientos()
-      .then((data) => setRows(data as unknown as Record<string, unknown>[]))
+      .then(setRows)
       .catch(() => setError('No se pudieron cargar los movimientos.'))
       .finally(() => setLoading(false))
   }, [])
@@ -51,36 +53,61 @@ export function CatalogoPage() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>ID Período</TableCell>
-                <TableCell>ID Movimiento</TableCell>
+                <TableCell>Período</TableCell>
+                <TableCell>Concepto</TableCell>
+                <TableCell>Tipo</TableCell>
+                <TableCell>Naturaleza</TableCell>
+                <TableCell>Descripción</TableCell>
+                <TableCell>Activo</TableCell>
                 <TableCell align="right">Previsto</TableCell>
                 <TableCell align="right">Real</TableCell>
+                <TableCell align="center">Cuotas</TableCell>
                 <TableCell>Notas</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ color: 'text.secondary' }}>
+                  <TableCell colSpan={10} align="center" sx={{ color: 'text.secondary' }}>
                     Sin datos
                   </TableCell>
                 </TableRow>
               ) : (
                 rows.map((row, i) => (
                   <TableRow key={i} hover>
-                    <TableCell>{String(row.idPeriodo ?? '')}</TableCell>
-                    <TableCell>{String(row.idMovimiento ?? '')}</TableCell>
-                    <TableCell align="right">
-                      {typeof row.montoPrevisto === 'number'
-                        ? row.montoPrevisto.toLocaleString('es-AR')
-                        : '—'}
+                    <TableCell>
+                      {row.periodoResponse.mes}/{row.periodoResponse.anio}
+                    </TableCell>
+                    <TableCell>{row.movimientoResponse.nombre}</TableCell>
+                    <TableCell>{row.movimientoResponse.tipoMov.nombre}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.movimientoResponse.tipoMov.naturaleza === 'I' ? 'Ingreso' : 'Gasto'}
+                        color={row.movimientoResponse.tipoMov.naturaleza === 'I' ? 'success' : 'error'}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>{row.movimientoResponse.descripcion ?? '—'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.movimientoResponse.activo ? 'Sí' : 'No'}
+                        color={row.movimientoResponse.activo ? 'success' : 'default'}
+                        size="small"
+                      />
                     </TableCell>
                     <TableCell align="right">
-                      {typeof row.montoReal === 'number'
-                        ? row.montoReal.toLocaleString('es-AR')
+                      {row.montoPrevisto.toLocaleString('es-AR')}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row.montoReal.toLocaleString('es-AR')}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.nroCuota > 0 && row.TotalCuotas > 0
+                        ? `${row.nroCuota}/${row.TotalCuotas}`
                         : '—'}
                     </TableCell>
-                    <TableCell>{row.notas ? String(row.notas) : '—'}</TableCell>
+                    <TableCell>{row.notas ?? '—'}</TableCell>
                   </TableRow>
                 ))
               )}
