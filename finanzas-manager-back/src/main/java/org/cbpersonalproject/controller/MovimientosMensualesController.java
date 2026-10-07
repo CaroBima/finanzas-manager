@@ -1,7 +1,9 @@
 package org.cbpersonalproject.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.cbpersonalproject.dto.MovimientoMensualResponse;
 import org.cbpersonalproject.dto.MovimientoRequest;
+import org.cbpersonalproject.service.MovimientosMensualesService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,12 +17,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/v1/controlmensual")
 public class MovimientosMensualesController {
 
+    private final MovimientosMensualesService movimientosMensuales;
+
     @GetMapping("/movimientos")
-    public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientos() {
-        return null ; //movimientosMensuales.getMovimientosMensuales();
+    public Flux<MovimientoMensualResponse> getMovimientos() {
+        return movimientosMensuales.getMovimientosMensuales();
     }
 
     @GetMapping("/tiposmovimiento")
