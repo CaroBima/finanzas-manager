@@ -16,5 +16,6 @@ public class Movimiento {
     private int idTipoMovimiento;
     private String nombre;
     private String descripcion;
-    private boolean activo;
+    private Boolean activo;
+
 }

@@ -18,10 +18,10 @@ interface TablaMensualProps {
 }
 
 function labelConCuotas(row: MovimientoMensualResponse): string {
-  if (row.nroCuota && row.totalCuotas) {
-    return `${row.movimiento.nombre} (${row.nroCuota}/${row.totalCuotas})`
+  if (row.nroCuota > 0 && row.TotalCuotas > 0) {
+    return `${row.movimientoResponse.nombre} (${row.nroCuota}/${row.TotalCuotas})`
   }
-  return row.movimiento.nombre
+  return row.movimientoResponse.nombre
 }
 
 function FilaTotales({
@@ -70,7 +70,7 @@ function SeccionMovimientos({
 }: {
   titulo: string
   filas: MovimientoMensualResponse[]
-  escenarioMap: Map<number, number>
+  escenarioMap: Map<string, number>
   mostrarEscenario: boolean
   naturaleza: Naturaleza
   labelTotal: string
@@ -80,7 +80,7 @@ function SeccionMovimientos({
   const totalPrevisto = filas.reduce((s, f) => s + (f.montoPrevisto ?? 0), 0)
   const totalReal = filas.reduce((s, f) => s + (f.montoReal ?? 0), 0)
   const totalEscenario = filas.reduce(
-    (s, f) => s + (escenarioMap.get(f.movimiento.idMovimiento) ?? 0),
+    (s, f) => s + (escenarioMap.get(f.movimientoResponse.nombre) ?? 0),
     0
   )
 
@@ -95,7 +95,7 @@ function SeccionMovimientos({
         </TableCell>
       </TableRow>
       {filas.map((row) => (
-        <TableRow key={row.idMovimientoMensual} hover>
+        <TableRow key={row.movimientoResponse.nombre} hover>
           <TableCell>{labelConCuotas(row)}</TableCell>
           <TableCell align="right">
             <MoneyCell amount={row.montoPrevisto} naturaleza={naturaleza} />
@@ -105,7 +105,7 @@ function SeccionMovimientos({
           </TableCell>
           {mostrarEscenario && (
             <TableCell align="right">
-              <MoneyCell amount={escenarioMap.get(row.movimiento.idMovimiento)} naturaleza={naturaleza} />
+              <MoneyCell amount={escenarioMap.get(row.movimientoResponse.nombre)} naturaleza={naturaleza} />
             </TableCell>
           )}
         </TableRow>
@@ -132,19 +132,19 @@ export function TablaMensual({ movimientos, escenarioDetalle }: TablaMensualProp
     )
   }
 
-  const gastos = movimientos.filter((m) => m.movimiento.tipoMovimiento?.naturaleza === 'E')
-  const ingresos = movimientos.filter((m) => m.movimiento.tipoMovimiento?.naturaleza === 'I')
+  const gastos = movimientos.filter((m) => m.movimientoResponse.tipoMov.naturaleza === 'E')
+  const ingresos = movimientos.filter((m) => m.movimientoResponse.tipoMov.naturaleza === 'I')
 
   const mostrarEscenario = !!escenarioDetalle && escenarioDetalle.length > 0
-  const escenarioMap = new Map((escenarioDetalle ?? []).map((d) => [d.movimiento.idMovimiento, d.monto]))
+  const escenarioMap = new Map((escenarioDetalle ?? []).map((d) => [d.movimiento.nombre, d.monto]))
 
   const totalGastosPrevisto = gastos.reduce((s, m) => s + (m.montoPrevisto ?? 0), 0)
   const totalGastosReal = gastos.reduce((s, m) => s + (m.montoReal ?? 0), 0)
-  const totalGastosEscenario = gastos.reduce((s, m) => s + (escenarioMap.get(m.movimiento.idMovimiento) ?? 0), 0)
+  const totalGastosEscenario = gastos.reduce((s, m) => s + (escenarioMap.get(m.movimientoResponse.nombre) ?? 0), 0)
 
   const totalIngresosPrevisto = ingresos.reduce((s, m) => s + (m.montoPrevisto ?? 0), 0)
   const totalIngresosReal = ingresos.reduce((s, m) => s + (m.montoReal ?? 0), 0)
-  const totalIngresosEscenario = ingresos.reduce((s, m) => s + (escenarioMap.get(m.movimiento.idMovimiento) ?? 0), 0)
+  const totalIngresosEscenario = ingresos.reduce((s, m) => s + (escenarioMap.get(m.movimientoResponse.nombre) ?? 0), 0)
 
   return (
     <TableContainer component={Paper} elevation={1}>

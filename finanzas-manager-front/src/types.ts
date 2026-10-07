@@ -21,15 +21,31 @@ export interface Periodo {
   mes: number
 }
 
+export interface PeriodoResponse {
+  mes: number
+  anio: number
+}
+
+export interface TipoMovimientoResponse {
+  nombre: string
+  naturaleza: Naturaleza
+}
+
+export interface MovimientoResponse {
+  nombre: string
+  descripcion?: string
+  activo: boolean
+  tipoMov: TipoMovimientoResponse
+}
+
 export interface MovimientoMensualResponse {
-  idMovimientoMensual: number
-  periodo: Periodo
-  movimiento: Movimiento
   montoPrevisto: number
   montoReal: number
-  nroCuota?: number
-  totalCuotas?: number
+  nroCuota: number
+  TotalCuotas: number
   notas?: string
+  periodoResponse: PeriodoResponse
+  movimientoResponse: MovimientoResponse
 }
 
 export interface Escenario {
