@@ -10,17 +10,17 @@ import reactor.core.publisher.Flux;
 public interface MovimientoMensualRepository extends ReactiveCrudRepository<MovimientoMensual, Integer> {
 
     @Query("""
-            Select m.nombre as nombreMovimiento, 
+            Select m.nombre as nombre_movimiento,
             m.descripcion as descripcion,
-            mm.monto_previsto as montoPrevisto, 
-            mm.monto_real as montoReal, 
-            mm.nro_cuota as nroCuota, 
-            mm.total_cuotas as totalCuotas, 
-            mm.notas as notas, 
-            tm.nombre as nombreTipoMovimiento, 
-            tm.naturaleza as naturalezaTipoMov,
+            mm.monto_previsto as monto_previsto,
+            mm.monto_real as monto_real,
+            mm.nro_cuota as nro_cuota,
+            mm.total_cuotas as total_cuotas,
+            mm.notas as notas,
+            tm.nombre as nombre_tipo_movimiento,
+            tm.naturaleza as naturaleza_tipo_mov,
             p.anio as anio,
-            p.mes as mes 
+            p.mes as mes
             from movimiento_mensual mm
             join movimiento m on m.id_movimiento = mm.id_movimiento
             join tipo_movimiento tm on tm.id_tipo_movimiento = m.id_tipo_movimiento

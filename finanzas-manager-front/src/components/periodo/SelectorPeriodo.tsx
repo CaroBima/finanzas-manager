@@ -1,6 +1,7 @@
-import { FormControl, IconButton, MenuItem, Select, Stack } from '@mui/material'
+import { Button, FormControl, IconButton, MenuItem, Select, Stack } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { useState, useEffect } from 'react'
 import { usePeriodo } from '../../hooks/usePeriodo'
 
 const MESES = [
@@ -12,6 +13,13 @@ const ANIOS = [2024, 2025, 2026, 2027]
 
 export function SelectorPeriodo() {
   const { mes, anio, setPeriodo, anterior, siguiente } = usePeriodo()
+  const [localMes, setLocalMes] = useState(mes)
+  const [localAnio, setLocalAnio] = useState(anio)
+
+  useEffect(() => {
+    setLocalMes(mes)
+    setLocalAnio(anio)
+  }, [mes, anio])
 
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
@@ -20,7 +28,7 @@ export function SelectorPeriodo() {
       </IconButton>
 
       <FormControl size="small">
-        <Select value={mes} onChange={(e) => setPeriodo(Number(e.target.value), anio)}>
+        <Select value={localMes} onChange={(e) => setLocalMes(Number(e.target.value))}>
           {MESES.map((nombre, i) => (
             <MenuItem key={i + 1} value={i + 1}>
               {nombre}
@@ -30,7 +38,7 @@ export function SelectorPeriodo() {
       </FormControl>
 
       <FormControl size="small">
-        <Select value={anio} onChange={(e) => setPeriodo(mes, Number(e.target.value))}>
+        <Select value={localAnio} onChange={(e) => setLocalAnio(Number(e.target.value))}>
           {ANIOS.map((a) => (
             <MenuItem key={a} value={a}>
               {a}
@@ -38,6 +46,15 @@ export function SelectorPeriodo() {
           ))}
         </Select>
       </FormControl>
+
+      <Button
+        size="small"
+        variant="contained"
+        disableElevation
+        onClick={() => setPeriodo(localMes, localAnio)}
+      >
+        Filtrar
+      </Button>
 
       <IconButton size="small" onClick={() => setPeriodo(siguiente.mes, siguiente.anio)}>
         <ChevronRightIcon />
