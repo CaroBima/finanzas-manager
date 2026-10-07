@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 
 public interface MovimientoMensualRepository extends ReactiveCrudRepository<MovimientoMensual, Integer> {
-    Mono<MovimientoMensual> findByPeriodo(int idPeriodo);
+    Flux<MovimientoMensual> findByIdPeriodo(int idPeriodo);
 }
