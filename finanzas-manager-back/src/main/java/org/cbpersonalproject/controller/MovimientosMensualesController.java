@@ -46,8 +46,8 @@ public class MovimientosMensualesController {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
-    @PostMapping
-    public Mono<ResponseEntity<MovimientoMensualResponse>> crearMovimiento(@Valid @RequestBody MovimientoRequest request){
+    @PostMapping("/movimientos/nuevo")
+    public Mono<ResponseEntity<MovimientoMensualResponse>> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
         return null;
     }
 }

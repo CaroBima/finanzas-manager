@@ -7,6 +7,8 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
+import java.time.YearMonth;
+
 public interface MovimientoMensualRepository extends ReactiveCrudRepository<MovimientoMensual, Integer> {
 
     @Query("""
@@ -29,9 +31,6 @@ public interface MovimientoMensualRepository extends ReactiveCrudRepository<Movi
             """)
     Flux<MovimientoPorPeriodoResponse> findByPeriodo(int mes, int anio);
 
-    /*    SELECT mm.*
-    FROM movimiento_mensual mm
-    INNER JOIN periodo p ON p.id_periodo = mm.id_periodo
-    WHERE p.mes = :mes
-      AND p.anio = :anio*/
+    Flux<MovimientoPorPeriodoResponse> findMovimientosDelPeriodo(YearMonth desde, YearMonth hasta);
+
 }
