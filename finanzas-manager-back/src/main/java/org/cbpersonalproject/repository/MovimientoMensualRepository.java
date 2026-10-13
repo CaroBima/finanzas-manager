@@ -31,7 +31,7 @@ public interface MovimientoMensualRepository extends ReactiveCrudRepository<Movi
             """)
     Flux<MovimientoPorPeriodoResponse> findByPeriodo(int mes, int anio);
 
-    
+
     @Query("""
     SELECT m.nombre AS nombre_movimiento,
            m.descripcion AS descripcion,
