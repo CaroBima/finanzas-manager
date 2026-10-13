@@ -102,7 +102,15 @@ public class MovimientoMensualService {
         YearMonth hasta = YearMonth.now();
         YearMonth desde = hasta.minusMonths(2);
 
-        return movMensRepo.findMovimientosDelPeriodo(desde, hasta)
+        // Mes y año de "hasta"
+        int mesHasta = hasta.getMonthValue();
+        int anioHasta = hasta.getYear();
+
+// Mes y año de "desde"
+        int mesDesde = desde.getMonthValue();
+        int anioDesde = desde.getYear();
+
+        return movMensRepo.findMovimientosDelPeriodo(mesDesde, anioDesde, mesHasta, anioHasta)
                 .collectList()
                 .flatMapMany(movimientos -> {
                     try {

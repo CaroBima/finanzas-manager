@@ -31,6 +31,33 @@ public interface MovimientoMensualRepository extends ReactiveCrudRepository<Movi
             """)
     Flux<MovimientoPorPeriodoResponse> findByPeriodo(int mes, int anio);
 
-    Flux<MovimientoPorPeriodoResponse> findMovimientosDelPeriodo(YearMonth desde, YearMonth hasta);
+    
+    @Query("""
+    SELECT m.nombre AS nombre_movimiento,
+           m.descripcion AS descripcion,
+           mm.monto_previsto AS monto_previsto,
+           mm.monto_real AS monto_real,
+           mm.nro_cuota AS nro_cuota,
+           mm.total_cuotas AS total_cuotas,
+           mm.notas AS notas,
+           tm.nombre AS nombre_tipo_movimiento,
+           tm.naturaleza AS naturaleza_tipo_mov,
+           p.anio AS anio,
+           p.mes AS mes
+    FROM movimiento_mensual mm
+    JOIN movimiento m
+        ON m.id_movimiento = mm.id_movimiento
+    JOIN tipo_movimiento tm
+        ON tm.id_tipo_movimiento = m.id_tipo_movimiento
+    JOIN periodo p
+        ON p.id_periodo = mm.id_periodo
+    WHERE (p.anio > :anioDesde
+           OR (p.anio = :anioDesde AND p.mes >= :mesDesde))
+      AND (p.anio < :anioHasta
+           OR (p.anio = :anioHasta AND p.mes <= :mesHasta))
+    """)
+    Flux<MovimientoPorPeriodoResponse> findMovimientosDelPeriodo(int mesDesde, int anioDesde, int mesHasta, int anioHasta);
 
 }
+
+
