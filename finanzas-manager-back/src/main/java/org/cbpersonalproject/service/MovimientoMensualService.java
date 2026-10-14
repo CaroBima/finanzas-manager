@@ -46,8 +46,8 @@ public class MovimientoMensualService {
     private Mono<MovimientoMensualResponse> toResponse(
             MovimientoMensual mov) {
         return Mono.zip(
-                periodoRepo.findById(mov.getIdPeriodo())
-                        .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getIdPeriodo()))),
+                periodoRepo.findById(mov.getPeriodo().getIdPeriodo() )
+                        .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getPeriodo().getIdPeriodo()))),
                 movimientoRepo.findById(mov.getIdMovimiento())
                         .switchIfEmpty(Mono.error(new RuntimeException("Movimiento no encontrado: " + mov.getIdMovimiento())))
         ).flatMap(datos -> {

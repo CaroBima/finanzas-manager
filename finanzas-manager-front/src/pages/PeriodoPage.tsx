@@ -7,8 +7,8 @@ import { useMovimientosMensuales } from '../hooks/useMovimientosMensuales'
 import { usePeriodo } from '../hooks/usePeriodo'
 
 export function PeriodoPage() {
-  const { mes, anio, periodoSeleccionado } = usePeriodo()
-  const { data, isLoading, isError } = useMovimientosMensuales(mes, anio, periodoSeleccionado)
+  const { mes, anio } = usePeriodo()
+  const { data, isLoading, isError } = useMovimientosMensuales(mes, anio)
 
   return (
     <Stack spacing={3}>

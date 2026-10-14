@@ -16,7 +16,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class MovimientoMensual {
     @Id
     private int idMovimientoMensual;
-    private int idPeriodo;
+    private Periodo periodo;
     private int idMovimiento;
     private double montoPrevisto;
     private double montoReal;
