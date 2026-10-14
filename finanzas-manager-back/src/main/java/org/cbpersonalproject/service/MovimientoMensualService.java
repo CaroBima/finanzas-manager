@@ -176,6 +176,11 @@ public class MovimientoMensualService {
                 });
     }
 
+    /**
+     * Permite obtener la información de movimientos correspondiente a los ultimos tres meses, que se encuentra almacenada en caché de Redis
+     * En caso de no encontrarse la información en caché la busca en la base de datos y la guardaen caché
+     * @return información de los movimientos de los ultimos 3 meses
+     */
     public Flux<MovimientoPorPeriodoResponse> getUltimosTresMeses(){
         return redis.opsForValue()
                 .get(CACHE_KEY)
