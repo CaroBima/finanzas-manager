@@ -1,10 +1,10 @@
 import client from './client'
-import type { MovimientoMensualResponse, Movimiento, TipoMovimiento } from '../types'
+import type { MovimientoMensualResponse, MovimientoPorPeriodoResponse, Movimiento, TipoMovimiento } from '../types'
 
 
 const URL_CONTROL_MENSUAL = '/v1/controlmensual';
 
-export async function fetchMovimientosMensuales(mes: number, anio: number): Promise<MovimientoMensualResponse[]> {
+export async function fetchMovimientosMensuales(mes: number, anio: number): Promise<MovimientoPorPeriodoResponse[]> {
   const { data } = await client.get(URL_CONTROL_MENSUAL + '/movimientosporperiodo', { params: { mes, anio } })
   return data
 }
