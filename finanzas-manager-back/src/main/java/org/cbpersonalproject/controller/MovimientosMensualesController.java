@@ -35,6 +35,10 @@ public class MovimientosMensualesController {
         return movimientosMensuales.getMovimientoMensualPorPeriodo(mes, anio);
     }
 
+    @GetMapping("/ultimostresmeses")
+    public Flux<MovimientoPorPeriodoResponse> getUltimosTresMeses() {
+        return movimientosMensuales.getUltimosTresMeses();
+    }
 
     @GetMapping("/tiposmovimiento")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getTiposMovimiento() {

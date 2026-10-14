@@ -11,6 +11,7 @@ import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.time.Duration;
 
+@Slf4j
 @Service 
 @RequiredArgsConstructor
 public class MovimientoMensualService {
@@ -108,14 +110,13 @@ public class MovimientoMensualService {
                         return Flux.fromIterable(movimientos);
 
                     } catch (JsonProcessingException e) {
+                        log.info("getMovimientoMensualPorPeriodo: Período {}-{} no encontrado en caché. Se cachea.", mes, anio);
                         return redis.delete(cacheKeyMensual)
                                 .thenMany(consultarYCachearPeriodo(
                                         mes, anio, cacheKeyMensual, tiempoCache));
                     }
                 })
-                .switchIfEmpty(
-                        consultarYCachearPeriodo(
-                                mes, anio, cacheKeyMensual, tiempoCache)
+                .switchIfEmpty(consultarYCachearPeriodo(mes, anio, cacheKeyMensual, tiempoCache)
                 );
     }
 
@@ -141,6 +142,7 @@ public class MovimientoMensualService {
                                 .thenMany(Flux.fromIterable(movimientos));
 
                     } catch (JsonProcessingException e) {
+                        log.info("consultarYCachearPeriodo: Error al cachear Período {}-{}", mes, anio);
                         return Flux.error(e);
                     }
                 });
@@ -171,6 +173,7 @@ public class MovimientoMensualService {
                                 .set(CACHE_KEY, json, tiempoCache)
                                 .thenMany(Flux.fromIterable(movimientos));
                     } catch (JsonProcessingException e) {
+                        log.info("consultarYCachear: Error al cachear datos entre Períodos {}-{} hasta {}-{}", mesDesde, anioDesde, mesHasta, anioHasta);
                         return Flux.error(e);
                     }
                 });
@@ -190,6 +193,7 @@ public class MovimientoMensualService {
                         });
                         return Flux.fromIterable(movimientos);
                     } catch (JsonProcessingException e) {
+                        log.info("getUltimosTresMeses: información no cacheada, se busca y cachea");
                         return redis.delete(CACHE_KEY)
                                 .thenMany(consultarYCachear());
                     }

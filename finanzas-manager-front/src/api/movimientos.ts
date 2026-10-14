@@ -9,6 +9,11 @@ export async function fetchMovimientosMensuales(mes: number, anio: number): Prom
   return data
 }
 
+export async function fetchUltimosTresMeses(): Promise<MovimientoPorPeriodoResponse[]> {
+  const { data } = await client.get(URL_CONTROL_MENSUAL + '/ultimostresmeses')
+  return data
+}
+
 export async function fetchCatalogoMovimientos(): Promise<MovimientoMensualResponse[]> {
   const { data } = await client.get(URL_CONTROL_MENSUAL + '/movimientos')
   return data

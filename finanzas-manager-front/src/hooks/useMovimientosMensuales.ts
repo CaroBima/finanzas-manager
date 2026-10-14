@@ -1,15 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchMovimientosMensuales,
+  fetchUltimosTresMeses,
   createMovimientoMensual,
   updateMovimientoMensual,
   deleteMovimientoMensual,
 } from '../api/movimientos'
 
-export function useMovimientosMensuales(mes: number, anio: number) {
+export function useMovimientosMensuales(mes: number, anio: number, periodoSeleccionado: boolean) {
   return useQuery({
-    queryKey: ['movimientosMensuales', mes, anio],
-    queryFn: () => fetchMovimientosMensuales(mes, anio),
+    queryKey: periodoSeleccionado ? ['movimientosMensuales', mes, anio] : ['ultimosTresMeses'],
+    queryFn: () => periodoSeleccionado ? fetchMovimientosMensuales(mes, anio) : fetchUltimosTresMeses(),
   })
 }
 

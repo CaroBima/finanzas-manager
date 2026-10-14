@@ -5,6 +5,7 @@ export function usePeriodo() {
   const [searchParams, setSearchParams] = useSearchParams()
   const now = new Date()
 
+  const periodoSeleccionado = searchParams.has('mes') || searchParams.has('anio')
   const mes = Number(searchParams.get('mes')) || now.getMonth() + 1
   const anio = Number(searchParams.get('anio')) || now.getFullYear()
 
@@ -22,5 +23,5 @@ export function usePeriodo() {
     [mes, anio]
   )
 
-  return { mes, anio, setPeriodo, anterior, siguiente }
+  return { mes, anio, periodoSeleccionado, setPeriodo, anterior, siguiente }
 }
