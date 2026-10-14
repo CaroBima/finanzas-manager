@@ -8,5 +8,5 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface PeriodoRepository  extends ReactiveCrudRepository<Periodo, Integer> {
-    Mono<Periodo> findByMesYAnio(int mes, int anio);
+    Mono<Periodo> findByMesAndAnio(int mes, int anio);
 }

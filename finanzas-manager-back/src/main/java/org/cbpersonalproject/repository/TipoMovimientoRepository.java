@@ -14,5 +14,5 @@ public interface TipoMovimientoRepository  extends ReactiveCrudRepository<TipoMo
             where nombre = :nombreTipo
             and naturaleza = :naturaleza
             """)
-    Mono<TipoMovimiento> findByTipoYNaturaleza(String nombreTipo, String naturaleza);
+    Mono<TipoMovimiento> findByTipoAndNaturaleza(String nombreTipo, String naturaleza);
 }

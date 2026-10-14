@@ -39,6 +39,8 @@ export function PeriodoPage() {
       <NuevoMovimientoModal
         open={modalMovimientoOpen}
         onClose={() => setModalMovimientoOpen(false)}
+        mes={mes}
+        anio={anio}
       />
     </Stack>
   )

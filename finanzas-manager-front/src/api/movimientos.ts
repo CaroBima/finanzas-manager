@@ -67,10 +67,18 @@ export async function updateMovimiento(
 }
 
 export async function createNuevoMovimiento(payload: {
-  idTipoMovimiento: number
-  nombre: string
-  descripcion?: string
-}): Promise<Movimiento> {
-  const { data } = await client.post('/movimientos/nuevo', payload)
+  nombreMovimiento: string
+  descripcionMovimiento?: string
+  montoPrevisto: number
+  montoReal?: number
+  nroCuota?: number
+  totalCuotas?: number
+  notas?: string
+  tipoMovimiento: string
+  naturaleza: string
+  mes: number
+  anio: number
+}): Promise<MovimientoMensualResponse> {
+  const { data } = await client.post(`${URL_CONTROL_MENSUAL}/movimientos/nuevo`, payload)
   return data
 }

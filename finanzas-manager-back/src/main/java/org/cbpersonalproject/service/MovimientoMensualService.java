@@ -239,7 +239,7 @@ public class MovimientoMensualService {
      */
     private Mono<Periodo> buscarPeriodo(int mes, int anio){
 
-        return periodoRepo.findByMesYAnio(mes, anio)
+        return periodoRepo.findByMesAndAnio(mes, anio)
                 .switchIfEmpty(Mono.defer(() -> {
                     Periodo nuevoPeriodo = new Periodo();
                     nuevoPeriodo.setMes(mes);
@@ -254,6 +254,6 @@ public class MovimientoMensualService {
     }
 
     private Mono<TipoMovimiento> busarTipoMovimiento (String tipoMovimiento, String naturaleza){
-        return tipoMovimientoRepo.findByTipoYNaturaleza(tipoMovimiento, naturaleza);
+        return tipoMovimientoRepo.findByTipoAndNaturaleza(tipoMovimiento, naturaleza);
     }
 }
