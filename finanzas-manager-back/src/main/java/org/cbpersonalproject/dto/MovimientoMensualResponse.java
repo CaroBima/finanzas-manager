@@ -1,7 +1,9 @@
 package org.cbpersonalproject.dto;
 
-public record MovimientoMensualResponse(double montoPrevisto,
-                                        double montoReal,
+import java.math.BigDecimal;
+
+public record MovimientoMensualResponse(BigDecimal montoPrevisto,
+                                        BigDecimal montoReal,
                                         int nroCuota,
                                         int TotalCuotas,
                                         String notas,

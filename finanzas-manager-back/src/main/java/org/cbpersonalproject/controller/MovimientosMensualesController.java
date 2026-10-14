@@ -40,6 +40,11 @@ public class MovimientosMensualesController {
         return movimientosMensuales.getUltimosTresMeses();
     }
 
+    @PostMapping("/movimientos/nuevo")
+    public Mono<ResponseEntity<MovimientoMensualResponse>> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
+        return movimientosMensuales.guardarMovimientoMensual(request);
+    }
+
     @GetMapping("/tiposmovimiento")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getTiposMovimiento() {
         return null ; //movimientosMensuales.getMovimientosMensuales();
@@ -50,9 +55,6 @@ public class MovimientosMensualesController {
         return null ; //movimientosMensuales.getMovimientosMensuales();
     }
 
-    @PostMapping("/movimientos/nuevo")
-    public Mono<ResponseEntity<MovimientoMensualResponse>> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
-        return null;
-    }
+
 }
 

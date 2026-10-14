@@ -8,6 +8,9 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,9 +20,9 @@ public class MovimientoMensual {
     @Id
     private int idMovimientoMensual;
     private Periodo periodo;
-    private int idMovimiento;
-    private double montoPrevisto;
-    private double montoReal;
+    private Movimiento movimiento;
+    private BigDecimal montoPrevisto;
+    private BigDecimal montoReal;
     private int nroCuota;
     private int totalCuotas;
     private String notas;

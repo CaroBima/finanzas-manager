@@ -65,3 +65,12 @@ export async function updateMovimiento(
   const { data } = await client.put(`/v1/movimientos/${id}`, payload)
   return data
 }
+
+export async function createNuevoMovimiento(payload: {
+  idTipoMovimiento: number
+  nombre: string
+  descripcion?: string
+}): Promise<Movimiento> {
+  const { data } = await client.post('/movimientos/nuevo', payload)
+  return data
+}
