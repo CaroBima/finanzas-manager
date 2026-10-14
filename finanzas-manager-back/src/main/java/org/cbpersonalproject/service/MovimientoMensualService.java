@@ -119,6 +119,14 @@ public class MovimientoMensualService {
                 );
     }
 
+    /**
+     * Busca en la base de datos los movimientos de un período determinado y lo guarda en el caché de Redis
+     * @param mes correspondiente al período a buscar
+     * @param anio correspondiente al período a buscar
+     * @param cacheKey key del caché
+     * @param tiempoCache tiempo por el cual se guardará la información en caché
+     * @return
+     */
     private Flux<MovimientoPorPeriodoResponse> consultarYCachearPeriodo(
             int mes, int anio, String cacheKey, long tiempoCache) {
 
