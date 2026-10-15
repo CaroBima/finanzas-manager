@@ -45,11 +45,6 @@ public class MovimientosMensualesController {
         return movimientosMensuales.guardarMovimientoMensual(request);
     }
 
-    @GetMapping("/tiposmovimiento")
-    public Flux<ResponseEntity<MovimientoMensualResponse>> getTiposMovimiento() {
-        return null ; //movimientosMensuales.getMovimientosMensuales();
-    }
-
     @GetMapping("/movimientos/{id}")
     public Flux<ResponseEntity<MovimientoMensualResponse>> getMovimientosPorId(@RequestParam int id) {
         return null ; //movimientosMensuales.getMovimientosMensuales();

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchCatalogoMovimientos,
   fetchTiposMovimiento,
+  fetchMovimientos,
   createMovimiento,
   updateMovimiento,
 } from '../api/movimientos'
@@ -17,6 +18,13 @@ export function useTiposMovimiento() {
   return useQuery({
     queryKey: ['tiposMovimiento'],
     queryFn: fetchTiposMovimiento,
+  })
+}
+
+export function useMovimientos() {
+  return useQuery({
+    queryKey: ['movimientos'],
+    queryFn: fetchMovimientos,
   })
 }
 
