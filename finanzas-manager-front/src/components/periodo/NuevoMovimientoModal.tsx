@@ -14,7 +14,7 @@ import {
   Box,
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useTiposMovimiento } from '../../hooks/useCatalogo'
+import { useMovimientos } from '../../hooks/useCatalogo'
 import { createNuevoMovimiento } from '../../api/movimientos'
 
 interface Props {
@@ -25,9 +25,7 @@ interface Props {
 }
 
 const EMPTY_FORM = {
-  idTipoMovimiento: '',
   nombreMovimiento: '',
-  descripcionMovimiento: '',
   montoPrevisto: '',
   montoReal: '',
   nroCuota: '',
@@ -37,10 +35,12 @@ const EMPTY_FORM = {
 
 export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   const queryClient = useQueryClient()
-  const { data: tipos, isLoading: loadingTipos } = useTiposMovimiento()
+  const { data: movimientos, isLoading: loadingMovimientos } = useMovimientos()
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const movimientoSeleccionado = movimientos?.find((m) => m.nombre === form.nombreMovimiento) ?? null
 
   const handleClose = () => {
     setForm(EMPTY_FORM)
@@ -53,8 +53,12 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   }
 
   const handleSubmit = async () => {
-    if (!form.idTipoMovimiento || !form.nombreMovimiento.trim()) {
-      setError('El tipo y el nombre son obligatorios.')
+    if (!form.nombreMovimiento) {
+      setError('El nombre es obligatorio.')
+      return
+    }
+    if (!movimientoSeleccionado) {
+      setError('Movimiento inválido.')
       return
     }
     const montoPrevisto = Number(form.montoPrevisto)
@@ -80,25 +84,18 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
       return
     }
 
-    const tipoSeleccionado = tipos?.find((t) => t.idTipoMovimiento === Number(form.idTipoMovimiento))
-    if (!tipoSeleccionado) {
-      setError('Tipo de movimiento inválido.')
-      return
-    }
-
     setSubmitting(true)
     setError(null)
     try {
       await createNuevoMovimiento({
-        nombreMovimiento: form.nombreMovimiento.trim(),
-        ...(form.descripcionMovimiento.trim() ? { descripcionMovimiento: form.descripcionMovimiento.trim() } : {}),
+        nombreMovimiento: movimientoSeleccionado.nombre,
         montoPrevisto,
         ...(montoReal !== undefined ? { montoReal } : {}),
         ...(nroCuota !== undefined ? { nroCuota } : {}),
         ...(totalCuotas !== undefined ? { totalCuotas } : {}),
         ...(form.notas.trim() ? { notas: form.notas.trim() } : {}),
-        tipoMovimiento: tipoSeleccionado.nombre,
-        naturaleza: tipoSeleccionado.naturaleza,
+        tipoMovimiento: movimientoSeleccionado.tipoMov.nombre,
+        naturaleza: movimientoSeleccionado.tipoMov.naturaleza,
         mes,
         anio,
       })
@@ -123,26 +120,30 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
           )}
           <TextField
             select
-            label="Tipo de movimiento"
-            value={form.idTipoMovimiento}
-            onChange={handleChange('idTipoMovimiento')}
-            disabled={loadingTipos}
-            slotProps={{ input: { endAdornment: loadingTipos ? <CircularProgress size={16} /> : null } }}
+            label="Nombre"
+            value={form.nombreMovimiento}
+            onChange={handleChange('nombreMovimiento')}
+            disabled={loadingMovimientos}
+            slotProps={{ input: { endAdornment: loadingMovimientos ? <CircularProgress size={16} /> : null } }}
             fullWidth
             required
           >
-            {(tipos ?? []).map((t) => (
-              <MenuItem key={t.idTipoMovimiento} value={t.idTipoMovimiento}>
-                {t.nombre} — {t.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}
+            {(movimientos ?? []).filter((m) => m.activo).map((m) => (
+              <MenuItem key={m.nombre} value={m.nombre}>
+                {m.nombre}
               </MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Nombre"
-            value={form.nombreMovimiento}
-            onChange={handleChange('nombreMovimiento')}
+            label="Tipo de movimiento"
+            value={
+              movimientoSeleccionado
+                ? `${movimientoSeleccionado.tipoMov.nombre} — ${movimientoSeleccionado.tipoMov.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}`
+                : ''
+            }
+            slotProps={{ input: { readOnly: true } }}
             fullWidth
-            required
+            disabled={!movimientoSeleccionado}
           />
           <TextField
             label="Monto previsto"
@@ -185,14 +186,6 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
               fullWidth
             />
           </Box>
-          <TextField
-            label="Descripción"
-            value={form.descripcionMovimiento}
-            onChange={handleChange('descripcionMovimiento')}
-            fullWidth
-            multiline
-            minRows={2}
-          />
           <TextField
             label="Notas"
             value={form.notas}

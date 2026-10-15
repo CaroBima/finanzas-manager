@@ -27,6 +27,7 @@ export interface PeriodoResponse {
 }
 
 export interface TipoMovimientoResponse {
+  idTipoMovimiento: number
   nombre: string
   naturaleza: Naturaleza
 }
