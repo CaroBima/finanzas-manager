@@ -1,6 +1,7 @@
 import {
   Box,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -24,6 +25,24 @@ function labelConCuotas(row: MovimientoPorPeriodoResponse): string {
   return row.nombreMovimiento
 }
 
+function CeldaConcepto({ row }: { row: MovimientoPorPeriodoResponse }) {
+  return (
+    <Stack spacing={0.25}>
+      <Typography variant="body2">{labelConCuotas(row)}</Typography>
+      {row.descripcion && (
+        <Typography variant="caption" color="text.secondary">
+          {row.descripcion}
+        </Typography>
+      )}
+      {row.notas && (
+        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+          Notas: {row.notas}
+        </Typography>
+      )}
+    </Stack>
+  )
+}
+
 function FilaTotales({
   label,
   previsto,
@@ -44,7 +63,9 @@ function FilaTotales({
     : { fontWeight: 600, bgcolor: 'grey.100' }
   return (
     <TableRow>
-      <TableCell sx={sx}>{label}</TableCell>
+      <TableCell sx={sx} colSpan={2}>
+        {label}
+      </TableCell>
       <TableCell align="right" sx={sx}>
         <MoneyCell amount={previsto} />
       </TableCell>
@@ -75,7 +96,7 @@ function SeccionMovimientos({
   naturaleza: Naturaleza
   labelTotal: string
 }) {
-  const colSpan = mostrarEscenario ? 4 : 3
+  const colSpan = mostrarEscenario ? 5 : 4
 
   const totalPrevisto = filas.reduce((s, f) => s + (f.montoPrevisto ?? 0), 0)
   const totalReal = filas.reduce((s, f) => s + (f.montoReal ?? 0), 0)
@@ -96,7 +117,14 @@ function SeccionMovimientos({
       </TableRow>
       {filas.map((row) => (
         <TableRow key={row.nombreMovimiento} hover>
-          <TableCell>{labelConCuotas(row)}</TableCell>
+          <TableCell>
+            <CeldaConcepto row={row} />
+          </TableCell>
+          <TableCell>
+            <Typography variant="caption" color="text.secondary">
+              {row.nombreTipoMovimiento ?? '—'}
+            </Typography>
+          </TableCell>
           <TableCell align="right">
             <MoneyCell amount={row.montoPrevisto} naturaleza={naturaleza} />
           </TableCell>
@@ -152,6 +180,7 @@ export function TablaMensual({ movimientos, escenarioDetalle }: TablaMensualProp
         <TableHead>
           <TableRow>
             <TableCell>Concepto</TableCell>
+            <TableCell>Tipo</TableCell>
             <TableCell align="right">Previsto</TableCell>
             <TableCell align="right">Real</TableCell>
             {mostrarEscenario && <TableCell align="right">Final</TableCell>}

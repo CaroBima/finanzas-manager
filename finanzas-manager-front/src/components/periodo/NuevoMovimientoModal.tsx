@@ -11,6 +11,7 @@ import {
   Stack,
   TextField,
   Typography,
+  Box,
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTiposMovimiento } from '../../hooks/useCatalogo'
@@ -28,6 +29,10 @@ const EMPTY_FORM = {
   nombreMovimiento: '',
   descripcionMovimiento: '',
   montoPrevisto: '',
+  montoReal: '',
+  nroCuota: '',
+  totalCuotas: '',
+  notas: '',
 }
 
 export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
@@ -58,6 +63,23 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
       return
     }
 
+    const montoReal = form.montoReal !== '' ? Number(form.montoReal) : undefined
+    if (montoReal !== undefined && (isNaN(montoReal) || montoReal < 0)) {
+      setError('El monto real debe ser un número mayor o igual a 0.')
+      return
+    }
+
+    const nroCuota = form.nroCuota !== '' ? Number(form.nroCuota) : undefined
+    const totalCuotas = form.totalCuotas !== '' ? Number(form.totalCuotas) : undefined
+    if ((nroCuota !== undefined) !== (totalCuotas !== undefined)) {
+      setError('Debe completar tanto el nro. de cuota como el total de cuotas.')
+      return
+    }
+    if (nroCuota !== undefined && totalCuotas !== undefined && nroCuota > totalCuotas) {
+      setError('El nro. de cuota no puede ser mayor al total de cuotas.')
+      return
+    }
+
     const tipoSeleccionado = tipos?.find((t) => t.idTipoMovimiento === Number(form.idTipoMovimiento))
     if (!tipoSeleccionado) {
       setError('Tipo de movimiento inválido.')
@@ -71,6 +93,10 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
         nombreMovimiento: form.nombreMovimiento.trim(),
         ...(form.descripcionMovimiento.trim() ? { descripcionMovimiento: form.descripcionMovimiento.trim() } : {}),
         montoPrevisto,
+        ...(montoReal !== undefined ? { montoReal } : {}),
+        ...(nroCuota !== undefined ? { nroCuota } : {}),
+        ...(totalCuotas !== undefined ? { totalCuotas } : {}),
+        ...(form.notas.trim() ? { notas: form.notas.trim() } : {}),
         tipoMovimiento: tipoSeleccionado.nombre,
         naturaleza: tipoSeleccionado.naturaleza,
         mes,
@@ -86,9 +112,9 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" scroll="paper">
       <DialogTitle>Nuevo movimiento</DialogTitle>
-      <DialogContent>
+      <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 1 }}>
           {error && (
             <Typography variant="body2" color="error">
@@ -131,9 +157,46 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
             required
           />
           <TextField
+            label="Monto real"
+            value={form.montoReal}
+            onChange={handleChange('montoReal')}
+            type="number"
+            slotProps={{
+              htmlInput: { min: 0, step: '0.01' },
+              input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
+            }}
+            fullWidth
+          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="Nro. de cuota"
+              value={form.nroCuota}
+              onChange={handleChange('nroCuota')}
+              type="number"
+              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              fullWidth
+            />
+            <TextField
+              label="Total de cuotas"
+              value={form.totalCuotas}
+              onChange={handleChange('totalCuotas')}
+              type="number"
+              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              fullWidth
+            />
+          </Box>
+          <TextField
             label="Descripción"
             value={form.descripcionMovimiento}
             onChange={handleChange('descripcionMovimiento')}
+            fullWidth
+            multiline
+            minRows={2}
+          />
+          <TextField
+            label="Notas"
+            value={form.notas}
+            onChange={handleChange('notas')}
             fullWidth
             multiline
             minRows={2}
