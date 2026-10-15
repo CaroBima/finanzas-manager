@@ -20,7 +20,7 @@ export async function fetchCatalogoMovimientos(): Promise<MovimientoMensualRespo
 }
 
 export async function fetchTiposMovimiento(): Promise<TipoMovimiento[]> {
-  const { data } = await client.get(URL_CONTROL_MENSUAL + '/tiposmovimiento')
+  const { data } = await client.get('/v1/tipomovimiento/tiposmovimientos')
   return data
 }
 

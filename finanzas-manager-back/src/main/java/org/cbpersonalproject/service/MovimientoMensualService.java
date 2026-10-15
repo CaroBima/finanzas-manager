@@ -46,19 +46,18 @@ public class MovimientoMensualService {
                 .flatMap(this::toResponse);
     }
 
-    private Mono<MovimientoMensualResponse> toResponse(
-            MovimientoMensual mov) {
+    private Mono<MovimientoMensualResponse> toResponse(MovimientoMensual mov) {
         return Mono.zip(
-                periodoRepo.findById(mov.getPeriodo().getIdPeriodo() )
-                        .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getPeriodo().getIdPeriodo()))),
-                movimientoRepo.findById(mov.getMovimiento().getIdMovimiento())
-                        .switchIfEmpty(Mono.error(new RuntimeException("Movimiento no encontrado: " + mov.getMovimiento().getIdMovimiento())))
+                periodoRepo.findById(mov.getIdPeriodo())
+                        .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getIdPeriodo()))),
+                movimientoRepo.findById(mov.getIdMovimiento())
+                        .switchIfEmpty(Mono.error(new RuntimeException("Movimiento no encontrado: " + mov.getIdMovimiento())))
         ).flatMap(datos -> {
-            Periodo periodo = datos.getT1() ;
+            Periodo periodo = datos.getT1();
             Movimiento movimiento = datos.getT2();
             return tipoMovimientoRepo
-                    .findById(movimiento.getTipoMovimiento().getIdTipoMovimiento())
-                    .switchIfEmpty(Mono.error(new RuntimeException("Tipo de Movimiento no encontrado: " + movimiento.getTipoMovimiento().getIdTipoMovimiento())))
+                    .findById(movimiento.getIdTipoMovimiento())
+                    .switchIfEmpty(Mono.error(new RuntimeException("Tipo de Movimiento no encontrado: " + movimiento.getIdTipoMovimiento())))
                     .map(tipo -> new MovimientoMensualResponse(
                             mov.getMontoPrevisto(),
                             mov.getMontoReal(),
@@ -74,9 +73,10 @@ public class MovimientoMensualService {
                                     movimiento.getDescripcion(),
                                     movimiento.getActivo(),
                                     new TipoMovimientoResponse(
+                                            tipo.getIdTipoMovimiento(),
                                             tipo.getNombre(),
                                             tipo.getNaturaleza()
-                            ))
+                                    ))
                     ));
         });
     }
@@ -203,30 +203,27 @@ public class MovimientoMensualService {
     }
 
     public Mono<ResponseEntity<MovimientoMensualResponse>> guardarMovimientoMensual(MovimientoRequest request){
-        MovimientoMensual movimiento = new MovimientoMensual();
-
-
-        return null;
+        String cacheKey = "finanzas:movimientos:" + request.anio() + ":" + request.mes();
+        return mapearMovimientoMensual(request)
+                .flatMap(movMensRepo::save)
+                .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
+                .flatMap(this::toResponse)
+                .map(ResponseEntity::ok);
     }
 
-    private Mono<MovimientoMensual> mapearMovimientoMensual(MovimientoRequest request){
-
-
+    private Mono<MovimientoMensual> mapearMovimientoMensual(MovimientoRequest request) {
         return Mono.zip(
                 buscarPeriodo(request.mes(), request.anio()),
-                busarTipoMovimiento(request.tipoMovimiento(), request.naturaleza()),
-                buscarMovimiento(request.nombreMovimiento())
-        ).map(resultado ->{
+                buscarOCrearMovimiento(request)
+        ).map(resultado -> {
             MovimientoMensual nuevoMovimientoMensual = new MovimientoMensual();
-            nuevoMovimientoMensual.setPeriodo(resultado.getT1());
-            TipoMovimiento tipoMovimiento = resultado.getT2();
-            nuevoMovimientoMensual.setMovimiento(resultado.getT3());
+            nuevoMovimientoMensual.setIdPeriodo(resultado.getT1().getIdPeriodo());
+            nuevoMovimientoMensual.setIdMovimiento(resultado.getT2().getIdMovimiento());
             nuevoMovimientoMensual.setMontoPrevisto(request.montoPrevisto());
             nuevoMovimientoMensual.setMontoReal(request.montoReal());
             nuevoMovimientoMensual.setNroCuota(request.nroCuota());
             nuevoMovimientoMensual.setTotalCuotas(request.totalCuotas());
             nuevoMovimientoMensual.setNotas(request.notas());
-
             return nuevoMovimientoMensual;
         });
     }
@@ -249,11 +246,23 @@ public class MovimientoMensualService {
                 }));
     }
 
-    private Mono<Movimiento> buscarMovimiento(String nombre){
-        return movimientoRepo.findByNombre(nombre);
+    private Mono<Movimiento> buscarOCrearMovimiento(MovimientoRequest request) {
+        return movimientoRepo.findByNombre(request.nombreMovimiento())
+                .switchIfEmpty(Mono.defer(() ->
+                        busarTipoMovimiento(request.tipoMovimiento(), request.naturaleza())
+                                .switchIfEmpty(Mono.error(new RuntimeException("Tipo de movimiento no encontrado: " + request.tipoMovimiento())))
+                                .flatMap(tipo -> {
+                                    Movimiento nuevo = new Movimiento();
+                                    nuevo.setNombre(request.nombreMovimiento());
+                                    nuevo.setDescripcion(request.descripcionMovimiento());
+                                    nuevo.setActivo(true);
+                                    nuevo.setIdTipoMovimiento(tipo.getIdTipoMovimiento());
+                                    return movimientoRepo.save(nuevo);
+                                })
+                ));
     }
 
-    private Mono<TipoMovimiento> busarTipoMovimiento (String tipoMovimiento, String naturaleza){
+    private Mono<TipoMovimiento> busarTipoMovimiento(String tipoMovimiento, String naturaleza){
         return tipoMovimientoRepo.findByTipoAndNaturaleza(tipoMovimiento, naturaleza);
     }
 }
