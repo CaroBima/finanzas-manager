@@ -9,6 +9,8 @@ import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.repository.MovimientoRepository;
 import org.cbpersonalproject.repository.PeriodoRepository;
 import org.cbpersonalproject.repository.TipoMovimientoRepository;
+import org.cbpersonalproject.utils.Constantes;
+import org.cbpersonalproject.utils.Constantes.*;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.YearMonth;
 import java.util.List;
 import java.time.Duration;
+
+
+
 
 @Slf4j
 @Service 
@@ -37,8 +42,7 @@ public class MovimientoMensualService {
     private final ObjectMapper objectMapper;
 
     private static final String CACHE_KEY = "finanzas:movimientos:ultimos-3-meses";
-    private static final Duration CACHE_TTL = Duration.ofMinutes(10);
-    private static final long CACHE_TTL_JITTER_SECONDS = 30;
+
 
 
     public Flux<MovimientoMensualResponse> getMovimientosMensuales() {
@@ -94,8 +98,8 @@ public class MovimientoMensualService {
         String cacheKeyMensual =
                 "finanzas:movimientos:" + anio + ":" + mes;
 
-        long tiempoCache = CACHE_TTL.toSeconds()
-                + (long) (Math.random() * CACHE_TTL_JITTER_SECONDS);
+        long tiempoCache = Constantes.CACHE_TTL.toSeconds()
+                + (long) (Math.random() * Constantes.CACHE_TTL_JITTER_SECONDS);
 
         return redis.opsForValue()
                 .get(cacheKeyMensual)
@@ -161,7 +165,7 @@ public class MovimientoMensualService {
         int anioHasta = hasta.getYear();
         int mesDesde = desde.getMonthValue();
         int anioDesde = desde.getYear();
-        long tiempoCache = (CACHE_TTL).toSeconds() + (long)(Math.random() * CACHE_TTL_JITTER_SECONDS);
+        long tiempoCache = (Constantes.CACHE_TTL).toSeconds() + (long)(Math.random() * Constantes.CACHE_TTL_JITTER_SECONDS);
 
         return movMensRepo.findMovimientosDelPeriodo(mesDesde, anioDesde, mesHasta, anioHasta)
                 .collectList()
