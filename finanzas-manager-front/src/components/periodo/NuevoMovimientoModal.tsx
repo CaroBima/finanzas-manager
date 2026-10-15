@@ -25,6 +25,7 @@ interface Props {
 }
 
 const EMPTY_FORM = {
+  tipoMovimiento: '',
   nombreMovimiento: '',
   montoPrevisto: '',
   montoReal: '',
@@ -40,6 +41,14 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const tiposUnicos = [...new Map(
+    (movimientos ?? []).filter((m) => m.activo).map((m) => [m.tipoMov.nombre, m.tipoMov])
+  ).values()]
+
+  const movimientosFiltrados = (movimientos ?? []).filter(
+    (m) => m.activo && (!form.tipoMovimiento || m.tipoMov.nombre === form.tipoMovimiento)
+  )
+
   const movimientoSeleccionado = movimientos?.find((m) => m.nombre === form.nombreMovimiento) ?? null
 
   const handleClose = () => {
@@ -49,12 +58,16 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   }
 
   const handleChange = (field: keyof typeof EMPTY_FORM) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }))
+    if (field === 'tipoMovimiento') {
+      setForm((prev) => ({ ...prev, tipoMovimiento: e.target.value, nombreMovimiento: '' }))
+    } else {
+      setForm((prev) => ({ ...prev, [field]: e.target.value }))
+    }
   }
 
   const handleSubmit = async () => {
     if (!form.nombreMovimiento) {
-      setError('El nombre es obligatorio.')
+      setError('El movimiento es obligatorio.')
       return
     }
     if (!movimientoSeleccionado) {
@@ -120,31 +133,35 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
           )}
           <TextField
             select
-            label="Nombre"
-            value={form.nombreMovimiento}
-            onChange={handleChange('nombreMovimiento')}
+            label="Tipo de movimiento"
+            value={form.tipoMovimiento}
+            onChange={handleChange('tipoMovimiento')}
             disabled={loadingMovimientos}
             slotProps={{ input: { endAdornment: loadingMovimientos ? <CircularProgress size={16} /> : null } }}
             fullWidth
+          >
+            <MenuItem value="">Todos</MenuItem>
+            {tiposUnicos.map((t) => (
+              <MenuItem key={t.nombre} value={t.nombre}>
+                {t.nombre} — {t.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            label="Movimiento"
+            value={form.nombreMovimiento}
+            onChange={handleChange('nombreMovimiento')}
+            disabled={loadingMovimientos}
+            fullWidth
             required
           >
-            {(movimientos ?? []).filter((m) => m.activo).map((m) => (
+            {movimientosFiltrados.map((m) => (
               <MenuItem key={m.nombre} value={m.nombre}>
                 {m.nombre}
               </MenuItem>
             ))}
           </TextField>
-          <TextField
-            label="Tipo de movimiento"
-            value={
-              movimientoSeleccionado
-                ? `${movimientoSeleccionado.tipoMov.nombre} — ${movimientoSeleccionado.tipoMov.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}`
-                : ''
-            }
-            slotProps={{ input: { readOnly: true } }}
-            fullWidth
-            disabled={!movimientoSeleccionado}
-          />
           <TextField
             label="Monto previsto"
             value={form.montoPrevisto}
