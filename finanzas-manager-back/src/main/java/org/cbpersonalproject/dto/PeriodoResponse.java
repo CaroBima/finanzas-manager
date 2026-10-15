@@ -1,4 +1,5 @@
 package org.cbpersonalproject.dto;
 
-public record PeriodoResponse(int mes, int anio) {
+public record PeriodoResponse(Integer mes,
+                              Integer anio) {
 }

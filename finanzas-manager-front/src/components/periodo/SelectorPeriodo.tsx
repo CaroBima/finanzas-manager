@@ -6,7 +6,7 @@ import { usePeriodo } from '../../hooks/usePeriodo'
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
 
 const ANIOS = [2024, 2025, 2026, 2027]
