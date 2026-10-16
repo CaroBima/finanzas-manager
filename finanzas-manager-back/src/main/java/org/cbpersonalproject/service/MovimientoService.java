@@ -8,10 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.cbpersonalproject.dto.MovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoResponse;
 import org.cbpersonalproject.dto.TipoMovimientoResponse;
+import org.cbpersonalproject.model.Movimiento;
 import org.cbpersonalproject.repository.MovimientoRepository;
 import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -66,22 +68,7 @@ public class MovimientoService {
     private Flux<MovimientoResponse> buscarTodosYCachear(){
         long tiempoCache = Constantes.CACHE_TTL.toSeconds()
                 + (long) (Math.random() * Constantes.CACHE_TTL_JITTER_SECONDS);
-        return movimientoRepo.findAll()
-                .flatMap(movimiento -> {
-                    return tipoMovimientoRepo.findById(movimiento.getIdTipoMovimiento())
-                            .map(tipoMov -> {
-                                return new MovimientoResponse(
-                                        movimiento.getNombre(),
-                                        movimiento.getDescripcion(),
-                                        movimiento.getActivo(),
-                                        new TipoMovimientoResponse(
-                                                tipoMov.getIdTipoMovimiento(),
-                                                tipoMov.getNombre(),
-                                                tipoMov.getNaturaleza()
-                                        )
-                                );
-                            });
-                })
+        return mapearMovimiento()
                 .collectList()
                 .flatMapMany(lista -> {
                     try{
@@ -97,8 +84,54 @@ public class MovimientoService {
 
     }
 
-    public Mono<MovimientoResponse> nuevoMovimiento(MovimientoRequest request){
-
-        return null;
+    public Mono<ResponseEntity<MovimientoResponse>> nuevoMovimiento(MovimientoRequest request){
+        String cacheKey = Constantes.CACHE_KEY_MOVIMIENTO;
+        return mapearMovimientoAGuardar(request)
+                .flatMap(movimientoRepo::save)
+                .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
+                .flatMap(saved -> tipoMovimientoRepo.findById(saved.getIdTipoMovimiento())
+                        .map(tipoMov -> new MovimientoResponse(
+                                saved.getNombre(),
+                                saved.getDescripcion(),
+                                saved.getActivo(),
+                                new TipoMovimientoResponse(
+                                        tipoMov.getIdTipoMovimiento(),
+                                        tipoMov.getNombre(),
+                                        tipoMov.getNaturaleza()
+                                )
+                        )))
+                .map(ResponseEntity::ok);
     }
+
+    private Mono<Movimiento> mapearMovimientoAGuardar(MovimientoRequest request){
+        return tipoMovimientoRepo.findByTipoAndNaturaleza(request.tipoMovimiento(), request.naturaleza())
+                .map(tipoMov -> {
+                    Movimiento nuevo = new Movimiento();
+                    nuevo.setIdTipoMovimiento(tipoMov.getIdTipoMovimiento());
+                    nuevo.setNombre(request.nombreMovimiento());
+                    nuevo.setDescripcion(request.descripcionMovimiento());
+                    nuevo.setActivo(true);
+                    return nuevo;
+                });
+    }
+
+    private Flux<MovimientoResponse> mapearMovimiento(){
+        return movimientoRepo.findAll()
+                .flatMap(movimiento -> {
+                    return tipoMovimientoRepo.findById(movimiento.getIdTipoMovimiento())
+                            .map(tipoMov -> {
+                                return new MovimientoResponse(
+                                        movimiento.getNombre(),
+                                        movimiento.getDescripcion(),
+                                        movimiento.getActivo(),
+                                        new TipoMovimientoResponse(
+                                                tipoMov.getIdTipoMovimiento(),
+                                                tipoMov.getNombre(),
+                                                tipoMov.getNaturaleza()
+                                        )
+                                );
+                            });
+                });
+    }
+
 }

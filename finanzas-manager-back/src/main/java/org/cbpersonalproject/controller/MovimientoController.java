@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.cbpersonalproject.dto.MovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoResponse;
 import org.cbpersonalproject.service.MovimientoService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,7 +23,7 @@ public class MovimientoController {
     }
 
     @PostMapping("/nuevomovimiento")
-    public Mono<MovimientoResponse> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
+    public Mono<ResponseEntity<MovimientoResponse>> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
         return movimientoService.nuevoMovimiento(request);
     }
 }
