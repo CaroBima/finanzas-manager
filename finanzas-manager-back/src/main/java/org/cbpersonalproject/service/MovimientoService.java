@@ -100,6 +100,7 @@ public class MovimientoService {
     }
 
     public Mono<MovimientoResponse> nuevoMovimiento(MovimientoRequest request){
+
         return null;
     }
 }
