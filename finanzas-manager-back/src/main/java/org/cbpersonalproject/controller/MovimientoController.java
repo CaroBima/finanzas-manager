@@ -2,6 +2,7 @@ package org.cbpersonalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.cbpersonalproject.dto.AltaMovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoResponse;
 import org.cbpersonalproject.service.MovimientoService;
@@ -25,5 +26,10 @@ public class MovimientoController {
     @PostMapping("/nuevomovimiento")
     public Mono<ResponseEntity<MovimientoResponse>> nuevoMovimiento(@Valid @RequestBody MovimientoRequest request){
         return movimientoService.nuevoMovimiento(request);
+    }
+
+    @PostMapping("/alta")
+    public Mono<ResponseEntity<MovimientoResponse>> alta(@Valid @RequestBody AltaMovimientoRequest request) {
+        return movimientoService.altaMovimiento(request);
     }
 }

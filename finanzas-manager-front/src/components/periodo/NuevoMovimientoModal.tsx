@@ -16,6 +16,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useMovimientos } from '../../hooks/useCatalogo'
 import { createNuevoMovimiento } from '../../api/movimientos'
+import { CrearMovimientoModal } from './CrearMovimientoModal'
 
 interface Props {
   open: boolean
@@ -40,9 +41,10 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [crearOpen, setCrearOpen] = useState(false)
 
   const tiposUnicos = [...new Map(
-    (movimientos ?? []).filter((m) => m.activo).map((m) => [m.tipoMov.nombre, m.tipoMov])
+    (movimientos ?? []).filter((m) => m.activo).map((m) => [m.tipoMov.idTipoMovimiento, m.tipoMov])
   ).values()]
 
   const movimientosFiltrados = (movimientos ?? []).filter(
@@ -79,13 +81,11 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
       setError('El monto previsto debe ser un número mayor o igual a 0.')
       return
     }
-
     const montoReal = form.montoReal !== '' ? Number(form.montoReal) : undefined
     if (montoReal !== undefined && (isNaN(montoReal) || montoReal < 0)) {
       setError('El monto real debe ser un número mayor o igual a 0.')
       return
     }
-
     const nroCuota = form.nroCuota !== '' ? Number(form.nroCuota) : undefined
     const totalCuotas = form.totalCuotas !== '' ? Number(form.totalCuotas) : undefined
     if ((nroCuota !== undefined) !== (totalCuotas !== undefined)) {
@@ -96,7 +96,6 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
       setError('El nro. de cuota no puede ser mayor al total de cuotas.')
       return
     }
-
     setSubmitting(true)
     setError(null)
     try {
@@ -122,105 +121,119 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" scroll="paper">
-      <DialogTitle>Nuevo movimiento</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={3} sx={{ mt: 1 }}>
-          {error && (
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          )}
-          <TextField
-            select
-            label="Tipo de movimiento"
-            value={form.tipoMovimiento}
-            onChange={handleChange('tipoMovimiento')}
-            disabled={loadingMovimientos}
-            slotProps={{ input: { endAdornment: loadingMovimientos ? <CircularProgress size={16} /> : null } }}
-            fullWidth
-          >
-            <MenuItem value="">Todos</MenuItem>
-            {tiposUnicos.map((t) => (
-              <MenuItem key={t.nombre} value={t.nombre}>
-                {t.nombre} — {t.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            select
-            label="Movimiento"
-            value={form.nombreMovimiento}
-            onChange={handleChange('nombreMovimiento')}
-            disabled={loadingMovimientos}
-            fullWidth
-            required
-          >
-            {movimientosFiltrados.map((m) => (
-              <MenuItem key={m.nombre} value={m.nombre}>
-                {m.nombre}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            label="Monto previsto"
-            value={form.montoPrevisto}
-            onChange={handleChange('montoPrevisto')}
-            type="number"
-            slotProps={{
-              htmlInput: { min: 0, step: '0.01' },
-              input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
-            }}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Monto real"
-            value={form.montoReal}
-            onChange={handleChange('montoReal')}
-            type="number"
-            slotProps={{
-              htmlInput: { min: 0, step: '0.01' },
-              input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
-            }}
-            fullWidth
-          />
-          <Box sx={{ display: 'flex', gap: 2 }}>
+    <>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" scroll="paper">
+        <DialogTitle>Nuevo movimiento</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={3}>
+            {error && (
+              <Typography variant="body2" color="error">
+                {error}
+              </Typography>
+            )}
             <TextField
-              label="Nro. de cuota"
-              value={form.nroCuota}
-              onChange={handleChange('nroCuota')}
-              type="number"
-              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              select
+              label="Tipo de movimiento"
+              value={form.tipoMovimiento}
+              onChange={handleChange('tipoMovimiento')}
+              disabled={loadingMovimientos}
+              slotProps={{ input: { endAdornment: loadingMovimientos ? <CircularProgress size={16} /> : null } }}
               fullWidth
+            >
+              <MenuItem value="">Todos</MenuItem>
+              {tiposUnicos.map((t) => (
+                <MenuItem key={t.idTipoMovimiento} value={t.nombre}>
+                  {t.nombre} — {t.naturaleza === 'I' ? 'Ingreso' : 'Egreso'}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              label="Movimiento"
+              value={form.nombreMovimiento}
+              onChange={handleChange('nombreMovimiento')}
+              disabled={loadingMovimientos}
+              fullWidth
+              required
+            >
+              {movimientosFiltrados.map((m) => (
+                <MenuItem key={m.nombre} value={m.nombre}>
+                  {m.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Monto previsto"
+              value={form.montoPrevisto}
+              onChange={handleChange('montoPrevisto')}
+              type="number"
+              slotProps={{
+                htmlInput: { min: 0, step: '0.01' },
+                input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
+              }}
+              fullWidth
+              required
             />
             <TextField
-              label="Total de cuotas"
-              value={form.totalCuotas}
-              onChange={handleChange('totalCuotas')}
+              label="Monto real"
+              value={form.montoReal}
+              onChange={handleChange('montoReal')}
               type="number"
-              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              slotProps={{
+                htmlInput: { min: 0, step: '0.01' },
+                input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
+              }}
               fullWidth
             />
-          </Box>
-          <TextField
-            label="Notas"
-            value={form.notas}
-            onChange={handleChange('notas')}
-            fullWidth
-            multiline
-            minRows={2}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleClose} disabled={submitting}>
-          Cancelar
-        </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={submitting}>
-          {submitting ? <CircularProgress size={20} /> : 'Guardar'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label="Nro. de cuota"
+                value={form.nroCuota}
+                onChange={handleChange('nroCuota')}
+                type="number"
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                fullWidth
+              />
+              <TextField
+                label="Total de cuotas"
+                value={form.totalCuotas}
+                onChange={handleChange('totalCuotas')}
+                type="number"
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                fullWidth
+              />
+            </Box>
+            <TextField
+              label="Notas"
+              value={form.notas}
+              onChange={handleChange('notas')}
+              fullWidth
+              multiline
+              minRows={2}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setCrearOpen(true)} disabled={submitting}>
+            Crear movimiento
+          </Button>
+          <Box sx={{ flex: 1 }} />
+          <Button onClick={handleClose} disabled={submitting}>
+            Cancelar
+          </Button>
+          <Button variant="contained" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? <CircularProgress size={20} /> : 'Guardar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <CrearMovimientoModal
+        open={crearOpen}
+        onClose={() => setCrearOpen(false)}
+        onCreated={() => {
+          queryClient.invalidateQueries({ queryKey: ['movimientos'] })
+          setCrearOpen(false)
+        }}
+      />
+    </>
   )
 }

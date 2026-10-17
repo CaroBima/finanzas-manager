@@ -1,5 +1,5 @@
 import client from './client'
-import type { MovimientoMensualResponse, MovimientoPorPeriodoResponse, Movimiento, TipoMovimiento, MovimientoResponse } from '../types'
+import type { MovimientoMensualResponse, MovimientoPorPeriodoResponse, Movimiento, TipoMovimiento, MovimientoResponse, TipoMovimientoResponse } from '../types'
 
 
 const URL_CONTROL_MENSUAL = '/v1/controlmensual';
@@ -55,11 +55,12 @@ export async function deleteMovimientoMensual(id: number): Promise<void> {
 }
 
 export async function createMovimiento(payload: {
-  idTipoMovimiento: number
   nombre: string
   descripcion?: string
-}): Promise<Movimiento> {
-  const { data } = await client.post('/v1/movimientos', payload)
+  activo?: boolean
+  tipoMov: { idTipoMovimiento: number; nombre: string; naturaleza: string }
+}): Promise<MovimientoResponse> {
+  const { data } = await client.post('/v1/movimiento/alta', payload)
   return data
 }
 
@@ -70,6 +71,7 @@ export async function updateMovimiento(
   const { data } = await client.put(`/v1/movimientos/${id}`, payload)
   return data
 }
+
 
 export async function createNuevoMovimiento(payload: {
   nombreMovimiento: string
@@ -85,5 +87,13 @@ export async function createNuevoMovimiento(payload: {
   anio: number
 }): Promise<MovimientoMensualResponse> {
   const { data } = await client.post(`${URL_CONTROL_MENSUAL}/movimientos/nuevo`, payload)
+  return data
+}
+
+export async function createTipoMovimiento(payload: {
+  nombre: string
+  naturaleza: 'I' | 'E'
+}): Promise<TipoMovimientoResponse> {
+  const { data } = await client.post('/v1/tipomovimiento/alta', payload)
   return data
 }

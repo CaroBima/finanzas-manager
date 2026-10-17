@@ -5,11 +5,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cbpersonalproject.dto.AltaMovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoRequest;
 import org.cbpersonalproject.dto.MovimientoResponse;
 import org.cbpersonalproject.dto.TipoMovimientoResponse;
 import org.cbpersonalproject.model.Movimiento;
+import org.cbpersonalproject.model.MovimientoMensual;
+import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.repository.MovimientoRepository;
+import org.cbpersonalproject.repository.PeriodoRepository;
 import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -17,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.time.Duration;
 import java.util.List;
 
@@ -26,13 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovimientoService {
     private final MovimientoRepository movimientoRepo;
+    private final MovimientoMensualRepository movimientoMensualRepo;
     private final TipoMovimientoRepository tipoMovimientoRepo;
-
+    private final PeriodoRepository periodoRepo;
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
-
-
-
 
     /**
      * Busca todos los movimientos registrados en Redis, si no se encuentra en caché
@@ -88,6 +89,19 @@ public class MovimientoService {
         String cacheKey = Constantes.CACHE_KEY_MOVIMIENTO;
         return mapearMovimientoAGuardar(request)
                 .flatMap(movimientoRepo::save)
+                .zipWith(periodoRepo.findByMesAndAnio(request.mes(), request.anio()))
+                .flatMap(tuple -> {
+                    Movimiento savedMovimiento = tuple.getT1();
+                    MovimientoMensual mensual = new MovimientoMensual();
+                    mensual.setIdMovimiento(savedMovimiento.getIdMovimiento());
+                    mensual.setIdPeriodo(tuple.getT2().getIdPeriodo());
+                    mensual.setMontoPrevisto(request.montoPrevisto());
+                    mensual.setMontoReal(request.montoReal());
+                    mensual.setNroCuota(request.nroCuota());
+                    mensual.setTotalCuotas(request.totalCuotas());
+                    mensual.setNotas(request.notas());
+                    return movimientoMensualRepo.save(mensual).thenReturn(savedMovimiento);
+                })
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
                 .flatMap(saved -> tipoMovimientoRepo.findById(saved.getIdTipoMovimiento())
                         .map(tipoMov -> new MovimientoResponse(
@@ -100,6 +114,23 @@ public class MovimientoService {
                                         tipoMov.getNaturaleza()
                                 )
                         )))
+                .map(ResponseEntity::ok);
+    }
+
+    public Mono<ResponseEntity<MovimientoResponse>> altaMovimiento(AltaMovimientoRequest request) {
+        Movimiento nuevo = new Movimiento();
+        nuevo.setNombre(request.nombre());
+        nuevo.setDescripcion(request.descripcion());
+        nuevo.setActivo(request.activo() != null ? request.activo() : true);
+        nuevo.setIdTipoMovimiento(request.tipoMov().idTipoMovimiento());
+        return movimientoRepo.save(nuevo)
+                .flatMap(saved -> redis.delete(Constantes.CACHE_KEY_MOVIMIENTO).thenReturn(saved))
+                .map(saved -> new MovimientoResponse(
+                        saved.getNombre(),
+                        saved.getDescripcion(),
+                        saved.getActivo(),
+                        request.tipoMov()
+                ))
                 .map(ResponseEntity::ok);
     }
 
