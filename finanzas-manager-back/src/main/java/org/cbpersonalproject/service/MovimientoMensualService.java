@@ -41,7 +41,7 @@ public class MovimientoMensualService {
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
 
-    private static final String CACHE_KEY = "finanzas:movimientos:ultimos-3-meses";
+    private static final String CACHE_KEY = Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + "ultimos-3-meses";
 
 
 
@@ -95,8 +95,7 @@ public class MovimientoMensualService {
     public Flux<MovimientoPorPeriodoResponse> getMovimientoMensualPorPeriodo(
             int mes, int anio) {
 
-        String cacheKeyMensual =
-                "finanzas:movimientos:" + anio + ":" + mes;
+        String cacheKeyMensual = Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + anio + ":" + mes;
 
         long tiempoCache = Constantes.CACHE_TTL.toSeconds()
                 + (long) (Math.random() * Constantes.CACHE_TTL_JITTER_SECONDS);
@@ -207,7 +206,7 @@ public class MovimientoMensualService {
     }
 
     public Mono<ResponseEntity<MovimientoMensualResponse>> guardarMovimientoMensual(MovimientoRequest request){
-        String cacheKey = "finanzas:movimientos:" + request.anio() + ":" + request.mes();
+        String cacheKey =  Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + request.anio() + ":" + request.mes();
         return mapearMovimientoMensual(request)
                 .flatMap(movMensRepo::save)
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
