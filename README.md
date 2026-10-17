@@ -16,18 +16,6 @@ API REST reactiva para gestionar ingresos y egresos mensuales. Permite registrar
 | Build | Maven (Maven Wrapper) |
 | Contenedores | Docker + Docker Compose |
 
-## Historias de usuario
-
-| HU | Descripción | Estado |
-|---|---|---|
-| HU-01 | Autenticación con Keycloak | Completada |
-| HU-02 | Diseño e inicialización del esquema de base de datos PostgreSQL | Completada |
-| HU-03 | Endpoint GET — Consulta de gastos mensuales | En curso |
-| HU-04 | Endpoint POST — Guardar nuevo gasto mensual | Pendiente |
-| HU-05 | Endpoint POST — Crear nuevo tipo de gasto mensual | Pendiente |
-| HU-06 | Endpoint GET — Consultar tipos de gasto del usuario | Pendiente |
-| HU-07 | Endpoint DELETE — Eliminar gasto mensual | Pendiente |
-| HU-08 | Endpoint GET — Resumen/dashboard de gastos por categoría | Pendiente |
 
 ## Modelo de datos
 
