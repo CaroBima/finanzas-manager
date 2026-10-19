@@ -33,14 +33,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
-    client.post('/auth/logout').catch(() => {}).finally(() => {
-      try {
-        localStorage.removeItem(TOKEN_KEY)
-      } catch {
-        /* no-op */
-      }
-      setToken(null)
-    })
+    client.post<{ logoutUrl: string }>('/auth/logout')
+      .then(res => {
+        try { localStorage.removeItem(TOKEN_KEY) } catch { /* no-op */ }
+        setToken(null)
+        window.location.href = res.data.logoutUrl
+      })
+      .catch(() => {
+        try { localStorage.removeItem(TOKEN_KEY) } catch { /* no-op */ }
+        setToken(null)
+        window.location.replace('/login')
+      })
   }, [])
 
   return (

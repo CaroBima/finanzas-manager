@@ -1,16 +1,16 @@
 package org.cbpersonalproject.service;
 
+import org.cbpersonalproject.config.RabbitMQConfig;
 import org.cbpersonalproject.dto.*;
 import org.cbpersonalproject.model.Movimiento;
 import org.cbpersonalproject.model.MovimientoMensual;
 import org.cbpersonalproject.model.Periodo;
-import org.cbpersonalproject.model.TipoMovimiento;
 import org.cbpersonalproject.repository.MovimientoMensualRepository;
-import org.cbpersonalproject.repository.MovimientoRepository;
-import org.cbpersonalproject.repository.PeriodoRepository;
-import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
-import org.cbpersonalproject.utils.Constantes.*;
+import reactor.rabbitmq.OutboundMessage;
+import reactor.rabbitmq.Sender;
+import com.rabbitmq.client.AMQP;
+import java.util.Map;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,24 +26,19 @@ import java.util.List;
 import java.time.Duration;
 
 
-
-
 @Slf4j
 @Service 
 @RequiredArgsConstructor
 public class MovimientoMensualService {
 
     private final MovimientoMensualRepository movMensRepo;
-    private final PeriodoRepository periodoRepo;
-    private final MovimientoRepository movimientoRepo;
-    private final TipoMovimientoRepository tipoMovimientoRepo;
-
+    private final PeriodoService periodoService;
+    private final MovimientoService movimientoService;
+    private final TipoMovimientoService tipoMovimientoService;
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
-
     private static final String CACHE_KEY = Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + "ultimos-3-meses";
-
-
+    private final Sender sender;
 
     public Flux<MovimientoMensualResponse> getMovimientosMensuales() {
         return movMensRepo.findAll()
@@ -52,19 +47,20 @@ public class MovimientoMensualService {
 
     private Mono<MovimientoMensualResponse> toResponse(MovimientoMensual mov) {
         return Mono.zip(
-                periodoRepo.findById(mov.getIdPeriodo())
+                periodoService.BuscarPorId(mov.getIdPeriodo())
                         .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getIdPeriodo()))),
-                movimientoRepo.findById(mov.getIdMovimiento())
+                movimientoService.buscarPorId(mov.getIdMovimiento())
                         .switchIfEmpty(Mono.error(new RuntimeException("Movimiento no encontrado: " + mov.getIdMovimiento())))
         ).flatMap(datos -> {
             Periodo periodo = datos.getT1();
             Movimiento movimiento = datos.getT2();
-            return tipoMovimientoRepo
-                    .findById(movimiento.getIdTipoMovimiento())
+            return tipoMovimientoService
+                    .buscarPorId(movimiento.getIdTipoMovimiento())
                     .switchIfEmpty(Mono.error(new RuntimeException("Tipo de Movimiento no encontrado: " + movimiento.getIdTipoMovimiento())))
                     .map(tipo -> new MovimientoMensualResponse(
                             mov.getMontoPrevisto(),
                             mov.getMontoReal(),
+                            mov.getMontoSimulado(),
                             mov.getNroCuota(),
                             mov.getTotalCuotas(),
                             mov.getNotas(),
@@ -102,6 +98,10 @@ public class MovimientoMensualService {
 
         return redis.opsForValue()
                 .get(cacheKeyMensual)
+                .onErrorResume(e-> {
+                    log.warn("getMovimientoMensualPorPeriodo - Error al consultar Redis: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMapMany(json -> {
                     try {
                         List<MovimientoPorPeriodoResponse> movimientos =
@@ -191,6 +191,10 @@ public class MovimientoMensualService {
     public Flux<MovimientoPorPeriodoResponse> getUltimosTresMeses(){
         return redis.opsForValue()
                 .get(CACHE_KEY)
+                .onErrorResume(e-> {
+                    log.warn("MovimientoPorPeriodoResponse - Error al consultar Redis: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMapMany(json -> {
                     try {
                         List<MovimientoPorPeriodoResponse> movimientos = objectMapper.readValue(json, new TypeReference<List<MovimientoPorPeriodoResponse>>() {
@@ -205,25 +209,49 @@ public class MovimientoMensualService {
                 .switchIfEmpty(consultarYCachear());
     }
 
+    /**
+     * Guarda un movimiento mensual en la base de datos, envía un mensaje a rabbitMQ
+     * y actualiza el caché en Redis
+     * @param request
+     * @return
+     */
     public Mono<ResponseEntity<MovimientoMensualResponse>> guardarMovimientoMensual(MovimientoRequest request){
         String cacheKey =  Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + request.anio() + ":" + request.mes();
         return mapearMovimientoMensual(request)
                 .flatMap(movMensRepo::save)
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
                 .flatMap(this::toResponse)
+                .flatMap(response -> enviarMensaje(response).thenReturn(response))
                 .map(ResponseEntity::ok);
+    }
+
+    private Mono<Void> enviarMensaje(MovimientoMensualResponse response) {
+        return Mono.fromCallable(() -> objectMapper.writeValueAsBytes(response))
+                .flatMap(body -> {
+                    AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+                            .contentType("application/json")
+                            .headers(Map.of("__TypeId__", MovimientoMensualResponse.class.getName()))
+                            .build();
+                    return sender.send(Mono.just(new OutboundMessage(
+                            RabbitMQConfig.EXCHANGE,
+                            RabbitMQConfig.ROUTING_KEY,
+                            props,
+                            body
+                    )));
+                });
     }
 
     private Mono<MovimientoMensual> mapearMovimientoMensual(MovimientoRequest request) {
         return Mono.zip(
-                buscarPeriodo(request.mes(), request.anio()),
-                buscarOCrearMovimiento(request)
+                periodoService.buscarPeriodo(request.mes(), request.anio()),
+                movimientoService.buscarOCrearMovimiento(request)
         ).map(resultado -> {
             MovimientoMensual nuevoMovimientoMensual = new MovimientoMensual();
             nuevoMovimientoMensual.setIdPeriodo(resultado.getT1().getIdPeriodo());
             nuevoMovimientoMensual.setIdMovimiento(resultado.getT2().getIdMovimiento());
             nuevoMovimientoMensual.setMontoPrevisto(request.montoPrevisto());
             nuevoMovimientoMensual.setMontoReal(request.montoReal());
+            nuevoMovimientoMensual.setMontoSimulado(request.montoSimulado());
             nuevoMovimientoMensual.setNroCuota(request.nroCuota());
             nuevoMovimientoMensual.setTotalCuotas(request.totalCuotas());
             nuevoMovimientoMensual.setNotas(request.notas());
@@ -231,41 +259,9 @@ public class MovimientoMensualService {
         });
     }
 
-    /**
-     * Busca un período en la base de datos, si no encuentra resultados, lo guarda.
-     * @param mes
-     * @param anio
-     * @return Mono<Periodo> con el periodo encontrado o creado
-     */
-    private Mono<Periodo> buscarPeriodo(int mes, int anio){
 
-        return periodoRepo.findByMesAndAnio(mes, anio)
-                .switchIfEmpty(Mono.defer(() -> {
-                    Periodo nuevoPeriodo = new Periodo();
-                    nuevoPeriodo.setMes(mes);
-                    nuevoPeriodo.setAnio(anio);
 
-                    return periodoRepo.save(nuevoPeriodo);
-                }));
-    }
 
-    private Mono<Movimiento> buscarOCrearMovimiento(MovimientoRequest request) {
-        return movimientoRepo.findByNombre(request.nombreMovimiento())
-                .switchIfEmpty(Mono.defer(() ->
-                        busarTipoMovimiento(request.tipoMovimiento(), request.naturaleza())
-                                .switchIfEmpty(Mono.error(new RuntimeException("Tipo de movimiento no encontrado: " + request.tipoMovimiento())))
-                                .flatMap(tipo -> {
-                                    Movimiento nuevo = new Movimiento();
-                                    nuevo.setNombre(request.nombreMovimiento());
-                                    nuevo.setDescripcion(request.descripcionMovimiento());
-                                    nuevo.setActivo(true);
-                                    nuevo.setIdTipoMovimiento(tipo.getIdTipoMovimiento());
-                                    return movimientoRepo.save(nuevo);
-                                })
-                ));
-    }
 
-    private Mono<TipoMovimiento> busarTipoMovimiento(String tipoMovimiento, String naturaleza){
-        return tipoMovimientoRepo.findByTipoAndNaturaleza(tipoMovimiento, naturaleza);
-    }
+
 }

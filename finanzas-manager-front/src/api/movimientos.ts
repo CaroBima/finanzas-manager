@@ -78,6 +78,7 @@ export async function createNuevoMovimiento(payload: {
   descripcionMovimiento?: string
   montoPrevisto: number
   montoReal?: number
+  montoSimulado?: number
   nroCuota?: number
   totalCuotas?: number
   notas?: string

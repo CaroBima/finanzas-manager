@@ -30,6 +30,7 @@ const EMPTY_FORM = {
   nombreMovimiento: '',
   montoPrevisto: '',
   montoReal: '',
+  montoSimulado: '',
   nroCuota: '',
   totalCuotas: '',
   notas: '',
@@ -39,6 +40,7 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
   const queryClient = useQueryClient()
   const { data: movimientos, isLoading: loadingMovimientos } = useMovimientos()
   const [form, setForm] = useState(EMPTY_FORM)
+  const [touched, setTouched] = useState({ montoReal: false, montoSimulado: false })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [crearOpen, setCrearOpen] = useState(false)
@@ -55,15 +57,30 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
 
   const handleClose = () => {
     setForm(EMPTY_FORM)
+    setTouched({ montoReal: false, montoSimulado: false })
     setError(null)
     onClose()
   }
 
   const handleChange = (field: keyof typeof EMPTY_FORM) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
     if (field === 'tipoMovimiento') {
-      setForm((prev) => ({ ...prev, tipoMovimiento: e.target.value, nombreMovimiento: '' }))
+      setForm((prev) => ({ ...prev, tipoMovimiento: value, nombreMovimiento: '' }))
+    } else if (field === 'montoPrevisto') {
+      setForm((prev) => ({
+        ...prev,
+        montoPrevisto: value,
+        montoReal: touched.montoReal ? prev.montoReal : value,
+        montoSimulado: touched.montoSimulado ? prev.montoSimulado : value,
+      }))
+    } else if (field === 'montoReal') {
+      setTouched((prev) => ({ ...prev, montoReal: true }))
+      setForm((prev) => ({ ...prev, montoReal: value }))
+    } else if (field === 'montoSimulado') {
+      setTouched((prev) => ({ ...prev, montoSimulado: true }))
+      setForm((prev) => ({ ...prev, montoSimulado: value }))
     } else {
-      setForm((prev) => ({ ...prev, [field]: e.target.value }))
+      setForm((prev) => ({ ...prev, [field]: value }))
     }
   }
 
@@ -86,6 +103,11 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
       setError('El monto real debe ser un número mayor o igual a 0.')
       return
     }
+    const montoSimulado = form.montoSimulado !== '' ? Number(form.montoSimulado) : undefined
+    if (montoSimulado !== undefined && (isNaN(montoSimulado) || montoSimulado < 0)) {
+      setError('El monto simulado debe ser un número mayor o igual a 0.')
+      return
+    }
     const nroCuota = form.nroCuota !== '' ? Number(form.nroCuota) : undefined
     const totalCuotas = form.totalCuotas !== '' ? Number(form.totalCuotas) : undefined
     if ((nroCuota !== undefined) !== (totalCuotas !== undefined)) {
@@ -103,6 +125,7 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
         nombreMovimiento: movimientoSeleccionado.nombre,
         montoPrevisto,
         ...(montoReal !== undefined ? { montoReal } : {}),
+        ...(montoSimulado !== undefined ? { montoSimulado } : {}),
         ...(nroCuota !== undefined ? { nroCuota } : {}),
         ...(totalCuotas !== undefined ? { totalCuotas } : {}),
         ...(form.notas.trim() ? { notas: form.notas.trim() } : {}),
@@ -178,6 +201,17 @@ export function NuevoMovimientoModal({ open, onClose, mes, anio }: Props) {
               label="Monto real"
               value={form.montoReal}
               onChange={handleChange('montoReal')}
+              type="number"
+              slotProps={{
+                htmlInput: { min: 0, step: '0.01' },
+                input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
+              }}
+              fullWidth
+            />
+            <TextField
+              label="Monto simulado"
+              value={form.montoSimulado}
+              onChange={handleChange('montoSimulado')}
               type="number"
               slotProps={{
                 htmlInput: { min: 0, step: '0.01' },

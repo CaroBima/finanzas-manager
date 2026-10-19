@@ -39,4 +39,16 @@ public class TipoMovimientoService {
                 ))
                 .map(ResponseEntity::ok);
     }
+
+    public Mono<TipoMovimiento> buscarPorId(Integer idTipoMovimiento) {
+        return tipoMovimientoRepository.findById(idTipoMovimiento);
+    }
+
+    public Mono<TipoMovimiento> buscarTipoMovimiento(String tipoMovimiento, String naturaleza){
+        return tipoMovimientoRepository.findByTipoAndNaturaleza(tipoMovimiento, naturaleza);
+    }
+
+    public Mono<TipoMovimiento> findByTipoAndNaturaleza(String tipo, String naturaleza){
+        return tipoMovimientoRepository.findByTipoAndNaturaleza(tipo, naturaleza);
+    }
 }
