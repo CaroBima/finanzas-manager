@@ -10,7 +10,6 @@ import org.cbpersonalproject.repository.MovimientoRepository;
 import org.cbpersonalproject.repository.PeriodoRepository;
 import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
-import org.cbpersonalproject.utils.Constantes.*;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
