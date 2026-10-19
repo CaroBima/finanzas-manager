@@ -7,10 +7,8 @@ import org.cbpersonalproject.model.Periodo;
 import org.cbpersonalproject.model.TipoMovimiento;
 import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.repository.MovimientoRepository;
-import org.cbpersonalproject.repository.PeriodoRepository;
 import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
-import org.cbpersonalproject.utils.Constantes.*;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,7 +32,7 @@ import java.time.Duration;
 public class MovimientoMensualService {
 
     private final MovimientoMensualRepository movMensRepo;
-    private final PeriodoRepository periodoRepo;
+    private final PeriodoService periodoService;
     private final MovimientoRepository movimientoRepo;
     private final TipoMovimientoRepository tipoMovimientoRepo;
 
@@ -52,7 +50,7 @@ public class MovimientoMensualService {
 
     private Mono<MovimientoMensualResponse> toResponse(MovimientoMensual mov) {
         return Mono.zip(
-                periodoRepo.findById(mov.getIdPeriodo())
+                periodoService.BuscarPorId(mov.getIdPeriodo())
                         .switchIfEmpty(Mono.error(new RuntimeException("Periodo no encontrado: " + mov.getIdPeriodo()))),
                 movimientoRepo.findById(mov.getIdMovimiento())
                         .switchIfEmpty(Mono.error(new RuntimeException("Movimiento no encontrado: " + mov.getIdMovimiento())))
@@ -224,7 +222,7 @@ public class MovimientoMensualService {
 
     private Mono<MovimientoMensual> mapearMovimientoMensual(MovimientoRequest request) {
         return Mono.zip(
-                buscarPeriodo(request.mes(), request.anio()),
+                periodoService.buscarPeriodo(request.mes(), request.anio()),
                 buscarOCrearMovimiento(request)
         ).map(resultado -> {
             MovimientoMensual nuevoMovimientoMensual = new MovimientoMensual();
@@ -239,23 +237,7 @@ public class MovimientoMensualService {
         });
     }
 
-    /**
-     * Busca un período en la base de datos, si no encuentra resultados, lo guarda.
-     * @param mes
-     * @param anio
-     * @return Mono<Periodo> con el periodo encontrado o creado
-     */
-    private Mono<Periodo> buscarPeriodo(int mes, int anio){
 
-        return periodoRepo.findByMesAndAnio(mes, anio)
-                .switchIfEmpty(Mono.defer(() -> {
-                    Periodo nuevoPeriodo = new Periodo();
-                    nuevoPeriodo.setMes(mes);
-                    nuevoPeriodo.setAnio(anio);
-
-                    return periodoRepo.save(nuevoPeriodo);
-                }));
-    }
 
     private Mono<Movimiento> buscarOCrearMovimiento(MovimientoRequest request) {
         return movimientoRepo.findByNombre(request.nombreMovimiento())
