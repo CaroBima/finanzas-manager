@@ -216,13 +216,16 @@ public class MovimientoMensualService {
         String cacheKey =  Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + request.anio() + ":" + request.mes();
         return mapearMovimientoMensual(request)
                 .flatMap(movMensRepo::save)
-                .doOnSuccess(saved -> rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.EXCHANGE,
-                        RabbitMQConfig.ROUTING_KEY,
-                        "Nuevo movimiento guardado: " + saved.getIdMovimientoMensual()
-                ))
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
                 .flatMap(this::toResponse)
+                .doOnSuccess(response -> {
+                    assert response != null;
+                    rabbitTemplate.convertAndSend(
+                            RabbitMQConfig.EXCHANGE,
+                            RabbitMQConfig.ROUTING_KEY,
+                            response
+                    );
+                })
                 .map(ResponseEntity::ok);
     }
 
