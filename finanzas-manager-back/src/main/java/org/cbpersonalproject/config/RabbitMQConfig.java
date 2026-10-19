@@ -2,6 +2,7 @@ package org.cbpersonalproject.config;
 
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
@@ -62,6 +63,8 @@ public class RabbitMQConfig {
 
     @Bean
     public Sender sender(ConnectionFactory connectionFactory) {
-        return RabbitFlux.createSender(new SenderOptions().connectionFactory(connectionFactory));
+        com.rabbitmq.client.ConnectionFactory rabbitCf =
+                ((CachingConnectionFactory) connectionFactory).getRabbitConnectionFactory();
+        return RabbitFlux.createSender(new SenderOptions().connectionFactory(rabbitCf));
     }
 }
