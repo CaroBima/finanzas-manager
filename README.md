@@ -21,52 +21,38 @@ API REST reactiva para gestionar ingresos y egresos mensuales. Permite registrar
 
 ```mermaid
 erDiagram
-    tipo_movimiento {
-        int id_tipo_movimiento PK
-        varchar nombre
-        char naturaleza "I=ingreso / E=egreso"
-    }
-    movimiento {
-        int id_movimiento PK
-        int id_tipo_movimiento FK
-        varchar nombre
-        varchar descripcion
-        boolean activo
-    }
-    periodo {
-        int id_periodo PK
-        smallint anio
-        smallint mes
-    }
-    movimiento_mensual {
-        int id_movimiento_mensual PK
-        int id_periodo FK
-        int id_movimiento FK
-        numeric monto_previsto
-        numeric monto_real
-        smallint nro_cuota
-        smallint total_cuotas
-        varchar notas
-    }
-    escenario {
-        int id_escenario PK
-        int id_periodo FK
-        varchar nombre
-        varchar descripcion
-    }
-    escenario_detalle {
-        int id_escenario_detalle PK
-        int id_escenario FK
-        int id_movimiento FK
-        numeric monto
-    }
+  TipoMovimiento ||--o{ Movimiento : clasifica
+  Movimiento ||--o{ MovimientoMensual : "se registra en"
+  Periodo ||--o{ MovimientoMensual : contiene
 
-    tipo_movimiento ||--o{ movimiento : "clasifica"
-    movimiento ||--o{ movimiento_mensual : "registra"
-    periodo ||--o{ movimiento_mensual : "agrupa"
-    periodo ||--o{ escenario : "tiene"
-    escenario ||--o{ escenario_detalle : "contiene"
-    movimiento ||--o{ escenario_detalle : "participa en"
+  TipoMovimiento {
+    int idTipoMovimiento PK
+    string nombre "Sueldo, Gasto fijo, Tarjeta..."
+    char naturaleza "I=ingreso, E=egreso"
+  }
+  Movimiento {
+    int idMovimiento PK
+    int idTipoMovimiento FK
+    string nombre "expensas, luz, sueldo ayi"
+    string descripcion
+    boolean activo
+  }
+  Periodo {
+    int idPeriodo PK
+    int anio
+    int mes
+  }
+  MovimientoMensual {
+    int idMovimientoMensual PK
+    int idPeriodo FK
+    int idMovimiento FK
+    decimal montoPrevisto
+    decimal montoReal
+    decimal montoSimulado "NULL = no se incluye"
+    int nroCuota
+    int totalCuotas
+    string notas
+  }
 ```
 
 Las vistas `v_resumen_mensual` y `v_resumen_escenario` calculan totales y saldo sin almacenarlos.
