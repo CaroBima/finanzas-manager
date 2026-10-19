@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String QUEUE_MOVIMIENTO = "finanzas.movimiento.nuevo";
+    public static final String QUEUE_MOVIMIENTO = "finanzas.movimiento_mensual.nuevo";
     public static final String EXCHANGE = "finanzas.exchange";
-    public static final String ROUTING_KEY = "movimiento.nuevo";
+    public static final String ROUTING_KEY = "movimiento_mensual.nuevo";
 
     @Bean
     public Queue movimientoQueue() {

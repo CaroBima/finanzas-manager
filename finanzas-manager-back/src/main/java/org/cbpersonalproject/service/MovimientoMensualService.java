@@ -1,11 +1,13 @@
 package org.cbpersonalproject.service;
 
+import org.cbpersonalproject.config.RabbitMQConfig;
 import org.cbpersonalproject.dto.*;
 import org.cbpersonalproject.model.Movimiento;
 import org.cbpersonalproject.model.MovimientoMensual;
 import org.cbpersonalproject.model.Periodo;
 import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.utils.Constantes;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class MovimientoMensualService {
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
     private static final String CACHE_KEY = Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + "ultimos-3-meses";
-
+    private final RabbitTemplate rabbitTemplate;
 
     public Flux<MovimientoMensualResponse> getMovimientosMensuales() {
         return movMensRepo.findAll()
@@ -204,10 +206,21 @@ public class MovimientoMensualService {
                 .switchIfEmpty(consultarYCachear());
     }
 
+    /**
+     * Guarda un movimiento mensual en la base de datos, envía un mensaje a rabbitMQ
+     * y actualiza el caché en Redis
+     * @param request
+     * @return
+     */
     public Mono<ResponseEntity<MovimientoMensualResponse>> guardarMovimientoMensual(MovimientoRequest request){
         String cacheKey =  Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + request.anio() + ":" + request.mes();
         return mapearMovimientoMensual(request)
                 .flatMap(movMensRepo::save)
+                .doOnSuccess(saved -> rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.EXCHANGE,
+                        RabbitMQConfig.ROUTING_KEY,
+                        "Nuevo movimiento guardado: " + saved.getIdMovimientoMensual()
+                ))
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
                 .flatMap(this::toResponse)
                 .map(ResponseEntity::ok);
