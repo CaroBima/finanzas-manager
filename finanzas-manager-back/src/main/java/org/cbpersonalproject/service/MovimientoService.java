@@ -100,6 +100,7 @@ public class MovimientoService {
                     mensual.setIdPeriodo(tuple.getT2().getIdPeriodo());
                     mensual.setMontoPrevisto(request.montoPrevisto());
                     mensual.setMontoReal(request.montoReal());
+                    mensual.setMontoSimulado(request.montoSimulado());
                     mensual.setNroCuota(request.nroCuota());
                     mensual.setTotalCuotas(request.totalCuotas());
                     mensual.setNotas(request.notas());

@@ -18,6 +18,9 @@ public record MovimientoRequest(
         @PositiveOrZero
         BigDecimal montoReal,
 
+        @PositiveOrZero
+        BigDecimal montoSimulado,
+
         @Positive
         Integer nroCuota,
 

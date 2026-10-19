@@ -16,6 +16,3 @@ INSERT INTO movimiento_mensual (id_periodo, id_movimiento, monto_previsto, monto
   (1, 5, 5276696.00, 5276696.00, NULL, NULL),
   (1, 6,       NULL,  269656.00, NULL, NULL);
 
-INSERT INTO escenario (id_periodo, nombre) VALUES (1, 'Solo tarjeta y préstamo');
-INSERT INTO escenario_detalle (id_escenario, id_movimiento, monto) VALUES
-  (1, 3, 11965062.19), (1, 4, 189543.91), (1, 5, 5276696.00), (1, 6, 1173000.00);

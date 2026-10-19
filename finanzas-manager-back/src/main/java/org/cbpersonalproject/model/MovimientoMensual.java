@@ -25,6 +25,7 @@ public class MovimientoMensual {
     private Integer idMovimiento;
     private BigDecimal montoPrevisto;
     private BigDecimal montoReal;
+    private BigDecimal montoSimulado;
     private Integer nroCuota;
     private Integer totalCuotas;
     private String notas;

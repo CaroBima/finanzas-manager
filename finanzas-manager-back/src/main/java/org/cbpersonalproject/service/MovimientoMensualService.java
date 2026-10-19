@@ -55,6 +55,7 @@ public class MovimientoMensualService {
                     .map(tipo -> new MovimientoMensualResponse(
                             mov.getMontoPrevisto(),
                             mov.getMontoReal(),
+                            mov.getMontoSimulado(),
                             mov.getNroCuota(),
                             mov.getTotalCuotas(),
                             mov.getNotas(),
@@ -222,6 +223,7 @@ public class MovimientoMensualService {
             nuevoMovimientoMensual.setIdMovimiento(resultado.getT2().getIdMovimiento());
             nuevoMovimientoMensual.setMontoPrevisto(request.montoPrevisto());
             nuevoMovimientoMensual.setMontoReal(request.montoReal());
+            nuevoMovimientoMensual.setMontoSimulado(request.montoSimulado());
             nuevoMovimientoMensual.setNroCuota(request.nroCuota());
             nuevoMovimientoMensual.setTotalCuotas(request.totalCuotas());
             nuevoMovimientoMensual.setNotas(request.notas());
