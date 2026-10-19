@@ -102,6 +102,10 @@ public class MovimientoMensualService {
 
         return redis.opsForValue()
                 .get(cacheKeyMensual)
+                .onErrorResume(e-> {
+                    log.warn("getMovimientoMensualPorPeriodo - Error al consultar Redis: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMapMany(json -> {
                     try {
                         List<MovimientoPorPeriodoResponse> movimientos =
@@ -191,6 +195,10 @@ public class MovimientoMensualService {
     public Flux<MovimientoPorPeriodoResponse> getUltimosTresMeses(){
         return redis.opsForValue()
                 .get(CACHE_KEY)
+                .onErrorResume(e-> {
+                    log.warn("MovimientoPorPeriodoResponse - Error al consultar Redis: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMapMany(json -> {
                     try {
                         List<MovimientoPorPeriodoResponse> movimientos = objectMapper.readValue(json, new TypeReference<List<MovimientoPorPeriodoResponse>>() {

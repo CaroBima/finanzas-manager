@@ -46,6 +46,10 @@ public class MovimientoService {
 
         return redis.opsForValue()
                 .get(Constantes.CACHE_KEY_MOVIMIENTO)
+                .onErrorResume(e-> {
+                    log.warn("MovimientoService - buscarTodos - Error al consultar Redis: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMapMany(json ->{
                    try{
                        List<MovimientoResponse> movimientos =
