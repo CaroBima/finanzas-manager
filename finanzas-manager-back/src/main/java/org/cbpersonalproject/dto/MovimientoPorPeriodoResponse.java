@@ -11,5 +11,4 @@ public record MovimientoPorPeriodoResponse(String nombreMovimiento,
                                            String nombreTipoMovimiento,
                                            String naturalezaTipoMov,
                                            Integer anio,
-                                           Integer mes) {
-}
+                                           Integer mes) {}
