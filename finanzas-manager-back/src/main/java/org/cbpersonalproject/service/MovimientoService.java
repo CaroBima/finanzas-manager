@@ -30,7 +30,7 @@ import java.util.List;
 public class MovimientoService {
     private final MovimientoRepository movimientoRepo;
     private final MovimientoMensualRepository movimientoMensualRepo;
-    private final TipoMovimientoRepository tipoMovimientoRepo;
+    private final TipoMovimientoService tipoMovimientoService;
     private final PeriodoRepository periodoRepo;
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
@@ -107,7 +107,7 @@ public class MovimientoService {
                     return movimientoMensualRepo.save(mensual).thenReturn(savedMovimiento);
                 })
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
-                .flatMap(saved -> tipoMovimientoRepo.findById(saved.getIdTipoMovimiento())
+                .flatMap(saved -> tipoMovimientoService.buscarPorId(saved.getIdTipoMovimiento())
                         .map(tipoMov -> new MovimientoResponse(
                                 saved.getNombre(),
                                 saved.getDescripcion(),
@@ -139,7 +139,7 @@ public class MovimientoService {
     }
 
     private Mono<Movimiento> mapearMovimientoAGuardar(MovimientoRequest request){
-        return tipoMovimientoRepo.findByTipoAndNaturaleza(request.tipoMovimiento(), request.naturaleza())
+        return tipoMovimientoService.findByTipoAndNaturaleza(request.tipoMovimiento(), request.naturaleza())
                 .map(tipoMov -> {
                     Movimiento nuevo = new Movimiento();
                     nuevo.setIdTipoMovimiento(tipoMov.getIdTipoMovimiento());
@@ -153,7 +153,7 @@ public class MovimientoService {
     private Flux<MovimientoResponse> mapearMovimiento(){
         return movimientoRepo.findAll()
                 .flatMap(movimiento -> {
-                    return tipoMovimientoRepo.findById(movimiento.getIdTipoMovimiento())
+                    return tipoMovimientoService.buscarPorId(movimiento.getIdTipoMovimiento())
                             .map(tipoMov -> {
                                 return new MovimientoResponse(
                                         movimiento.getNombre(),
@@ -169,4 +169,23 @@ public class MovimientoService {
                 });
     }
 
+    public Mono<Movimiento> buscarOCrearMovimiento(MovimientoRequest request) {
+        return movimientoRepo.findByNombre(request.nombreMovimiento())
+                .switchIfEmpty(Mono.defer(() ->
+                        tipoMovimientoService.buscarTipoMovimiento(request.tipoMovimiento(), request.naturaleza())
+                                .switchIfEmpty(Mono.error(new RuntimeException("Tipo de movimiento no encontrado: " + request.tipoMovimiento())))
+                                .flatMap(tipo -> {
+                                    Movimiento nuevo = new Movimiento();
+                                    nuevo.setNombre(request.nombreMovimiento());
+                                    nuevo.setDescripcion(request.descripcionMovimiento());
+                                    nuevo.setActivo(true);
+                                    nuevo.setIdTipoMovimiento(tipo.getIdTipoMovimiento());
+                                    return movimientoRepo.save(nuevo);
+                                })
+                ));
+    }
+
+    public Mono<Movimiento> buscarPorId(Integer idMovimiento){
+        return movimientoRepo.findById(idMovimiento);
+    }
 }
