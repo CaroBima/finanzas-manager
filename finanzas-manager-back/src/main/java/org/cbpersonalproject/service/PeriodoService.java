@@ -2,11 +2,9 @@ package org.cbpersonalproject.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cbpersonalproject.dto.PeriodoResponse;
 import org.cbpersonalproject.model.Periodo;
 import org.cbpersonalproject.repository.PeriodoRepository;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j

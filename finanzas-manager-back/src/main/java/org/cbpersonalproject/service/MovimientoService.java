@@ -14,7 +14,6 @@ import org.cbpersonalproject.model.MovimientoMensual;
 import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.repository.MovimientoRepository;
 import org.cbpersonalproject.repository.PeriodoRepository;
-import org.cbpersonalproject.repository.TipoMovimientoRepository;
 import org.cbpersonalproject.utils.Constantes;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
