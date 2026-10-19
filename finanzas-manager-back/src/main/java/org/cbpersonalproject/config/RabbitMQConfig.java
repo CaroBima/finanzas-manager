@@ -8,6 +8,9 @@ import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.rabbitmq.RabbitFlux;
+import reactor.rabbitmq.Sender;
+import reactor.rabbitmq.SenderOptions;
 
 
 @Configuration
@@ -55,5 +58,10 @@ public class RabbitMQConfig {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(converter);
         return template;
+    }
+
+    @Bean
+    public Sender sender(ConnectionFactory connectionFactory) {
+        return RabbitFlux.createSender(new SenderOptions().connectionFactory(connectionFactory));
     }
 }

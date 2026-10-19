@@ -7,7 +7,10 @@ import org.cbpersonalproject.model.MovimientoMensual;
 import org.cbpersonalproject.model.Periodo;
 import org.cbpersonalproject.repository.MovimientoMensualRepository;
 import org.cbpersonalproject.utils.Constantes;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import reactor.rabbitmq.OutboundMessage;
+import reactor.rabbitmq.Sender;
+import com.rabbitmq.client.AMQP;
+import java.util.Map;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,7 +38,7 @@ public class MovimientoMensualService {
     private final ReactiveStringRedisTemplate redis;
     private final ObjectMapper objectMapper;
     private static final String CACHE_KEY = Constantes.CACHE_KEY_MOVIMIENTOS_MENSUALES + "ultimos-3-meses";
-    private final RabbitTemplate rabbitTemplate;
+    private final Sender sender;
 
     public Flux<MovimientoMensualResponse> getMovimientosMensuales() {
         return movMensRepo.findAll()
@@ -218,15 +221,24 @@ public class MovimientoMensualService {
                 .flatMap(movMensRepo::save)
                 .flatMap(saved -> redis.delete(cacheKey).thenReturn(saved))
                 .flatMap(this::toResponse)
-                .doOnSuccess(response -> {
-                    assert response != null;
-                    rabbitTemplate.convertAndSend(
+                .flatMap(response -> enviarMensaje(response).thenReturn(response))
+                .map(ResponseEntity::ok);
+    }
+
+    private Mono<Void> enviarMensaje(MovimientoMensualResponse response) {
+        return Mono.fromCallable(() -> objectMapper.writeValueAsBytes(response))
+                .flatMap(body -> {
+                    AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+                            .contentType("application/json")
+                            .headers(Map.of("__TypeId__", MovimientoMensualResponse.class.getName()))
+                            .build();
+                    return sender.send(Mono.just(new OutboundMessage(
                             RabbitMQConfig.EXCHANGE,
                             RabbitMQConfig.ROUTING_KEY,
-                            response
-                    );
-                })
-                .map(ResponseEntity::ok);
+                            props,
+                            body
+                    )));
+                });
     }
 
     private Mono<MovimientoMensual> mapearMovimientoMensual(MovimientoRequest request) {
