@@ -17,7 +17,7 @@ public class EscenarioController {
     @GetMapping("/escenarios")
     public Flux<MovimientoResponse> getEscenarios() {
 
-        return escenarioService.buscarTodos();
+        return null; // escenarioService.buscarTodos();
     }
 
 }
