@@ -225,6 +225,15 @@ public class MovimientoMensualService {
                 .map(ResponseEntity::ok);
     }
 
+    /**
+     * Envía un mensaje a la cola de RabbitMQ con los datos del movimiento mensual.
+     * <p>
+     * Serializa la respuesta a JSON, configura las propiedades del mensaje
+     * y lo publica en el exchange utilizando la routing key configurada.
+     *
+     * @param response respuesta con los datos del movimiento mensual que se enviará
+     * @return un Mono<Void> que representa la operación asíncrona de envío del mensaje
+     */
     private Mono<Void> enviarMensaje(MovimientoMensualResponse response) {
         return Mono.fromCallable(() -> objectMapper.writeValueAsBytes(response))
                 .flatMap(body -> {
