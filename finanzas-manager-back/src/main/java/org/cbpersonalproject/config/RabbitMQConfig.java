@@ -2,8 +2,10 @@ package org.cbpersonalproject.config;
 
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +23,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue movimientoQueue() {
-        return QueueBuilder.durable(QUEUE_MOVIMIENTO).build();
+        return QueueBuilder.durable(QUEUE_MOVIMIENTO)
+                .withArgument("x-dead-letter-exchange", "finanzas.dlx")
+                .withArgument("x-dead-letter-routing-key", "movimiento.error")
+                .build();
     }
 
     @Bean
@@ -62,6 +67,13 @@ public class RabbitMQConfig {
 
     @Bean
     public Sender sender(ConnectionFactory connectionFactory) {
-        return RabbitFlux.createSender(new SenderOptions().connectionFactory(connectionFactory));
+        com.rabbitmq.client.ConnectionFactory rabbitCf =
+                ((CachingConnectionFactory) connectionFactory).getRabbitConnectionFactory();
+        return RabbitFlux.createSender(new SenderOptions().connectionFactory(rabbitCf));
+    }
+
+    @Bean
+    public Queue deadLetterQueue(){
+        return QueueBuilder.durable("finanzas.movimiento.error").build();
     }
 }
